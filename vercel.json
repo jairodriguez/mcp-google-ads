@@ -1,7 +1,5 @@
 {
-    "builds": [
-      { "src": "Dockerfile", "use": "@vercel/docker" }
-    ],
+    
     "routes": [
       { "src": "/(.*)", "dest": "/$1" }
     ]
