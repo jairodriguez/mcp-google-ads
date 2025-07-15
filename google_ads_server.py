@@ -12,9 +12,11 @@ from google.auth.transport.requests import Request
 from google.auth.exceptions import RefreshError
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 import uvicorn
+from typing import List, Optional
+from pydantic import BaseModel
 
 # MCP
 from mcp.server.fastmcp import FastMCP
@@ -1469,6 +1471,59 @@ async def list_accounts_endpoint():
 # @app.get("/run-gaql", response_class=PlainTextResponse)
 # async def run_gaql_endpoint(customer_id: str, query: str, format: str = "table"):
 #     return await run_gaql(customer_id, query, format)
+
+class Idea(BaseModel):
+    text: str
+    avg_monthly_searches: int
+    competition: str
+    bid_low_micros: int
+    bid_high_micros: int
+
+@app.get("/keyword-ideas", response_model=List[Idea])
+async def keyword_ideas(
+    customer_id: str = Query(..., description="Google Ads customer ID, no dashes"),
+    q: List[str] = Query(..., description="One or more seed keywords"),
+    geo: str = Query("2484", description="Geo target constant ID (e.g. Mexico=2484)"),
+    lang: str = Query("1003", description="Language constant ID (e.g. Spanish=1003)"),
+    limit: Optional[int] = Query(None, description="Max number of ideas to return"),
+):
+    """
+    Fetch keyword ideas from the Google Ads API.
+    """
+    if not customer_id or len(q) == 0:
+        raise HTTPException(400, "customer_id and at least one q term are required")
+
+    try:
+        creds = get_credentials()
+        headers = get_headers(creds)
+        formatted_customer_id = format_customer_id(customer_id)
+        url = f"https://googleads.googleapis.com/{API_VERSION}/customers/{formatted_customer_id}:generateKeywordIdeas"
+        payload = {
+            "customerId": formatted_customer_id,
+            "keywordSeed": {"keywords": q},
+            "language": f"languageConstants/{lang}",
+            "geoTargetConstants": [f"geoTargetConstants/{geo}"],
+            "network": "GOOGLE_SEARCH_AND_PARTNERS",
+        }
+        if limit:
+            payload["pageSize"] = limit
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code != 200:
+            raise HTTPException(500, f"Google Ads error: {response.text}")
+        data = response.json()
+        ideas = []
+        for r in data.get("results", []):
+            m = r.get("keywordIdeaMetrics", {})
+            ideas.append(Idea(
+                text = r.get("text", ""),
+                avg_monthly_searches = m.get("avgMonthlySearches", 0),
+                competition = m.get("competition", "UNSPECIFIED"),
+                bid_low_micros = m.get("lowTopOfPageBidMicros", 0),
+                bid_high_micros = m.get("highTopOfPageBidMicros", 0),
+            ))
+        return ideas
+    except Exception as e:
+        raise HTTPException(500, f"Google Ads error: {e}")
 
 if __name__ == "__main__":
     # Start the MCP server on stdio transport
