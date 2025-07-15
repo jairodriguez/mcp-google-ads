@@ -1503,8 +1503,7 @@ async def keyword_ideas(
             "customerId": formatted_customer_id,
             "keywordSeed": {"keywords": q},
             "language": f"languageConstants/{lang}",
-            "geoTargetConstants": [f"geoTargetConstants/{geo}"],
-            "network": "GOOGLE_SEARCH_AND_PARTNERS",
+            "geoTargetConstants": [f"geoTargetConstants/{geo}"]
         }
         if limit:
             payload["pageSize"] = limit
