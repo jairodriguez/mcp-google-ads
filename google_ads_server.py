@@ -11,6 +11,7 @@ from google.oauth2 import service_account
 from google.auth.transport.requests import Request
 from google.auth.exceptions import RefreshError
 import logging
+import traceback
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import PlainTextResponse
@@ -1507,7 +1508,7 @@ async def keyword_ideas(
         }
         if limit:
             payload["pageSize"] = limit
-        response = requests.post(url, headers=headers, json=payload)
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
         if response.status_code != 200:
             raise HTTPException(500, f"Google Ads error: {response.text}")
         data = response.json()
@@ -1523,6 +1524,7 @@ async def keyword_ideas(
             ))
         return ideas
     except Exception as e:
+        logger.error(traceback.format_exc())
         raise HTTPException(500, f"Google Ads error: {e}")
 
 if __name__ == "__main__":

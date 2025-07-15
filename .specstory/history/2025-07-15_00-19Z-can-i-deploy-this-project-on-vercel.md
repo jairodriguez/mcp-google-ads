@@ -1526,3 +1526,1383 @@ Let me know if you want to expose more tools or need help with anything else!
 
 ---
 
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+The error `{"detail":"Not Found"}` from your Render deployment means the `/keyword-ideas` route is not available on your deployed server. This is almost always due to one of the following:
+
+---
+
+## Checklist to Fix "Not Found" for New FastAPI Route
+
+1. **Did you push your changes to GitHub (or your Render repo)?**
+   - Make sure the commit with the `/keyword-ideas` endpoint is in your remote repository.
+
+2. **Did Render actually redeploy with the new code?**
+   - Check the Render dashboard for the latest deploy logs and confirm the deployment timestamp matches your last push.
+
+3. **Is your FastAPI app being loaded as `google_ads_server:app`?**
+   - Your Dockerfile and Render Start Command should be:
+     ```
+     uvicorn google_ads_server:app --host 0.0.0.0 --port $PORT
+     ```
+   - If you changed the filename or app variable, update accordingly.
+
+4. **Is the endpoint path correct?**
+   - It should be `/keyword-ideas` (not `/keyword_ideas` or `/keywords-ideas`).
+
+5. **Is the code for the endpoint inside the main file and not inside an `if __name__ == "__main__":` block?**
+   - The code you added should be at the top level, not inside any function or main guard.
+
+6. **Did the build fail silently?**
+   - Check the Render deploy logs for errors. If the build failed, the old code may still be running.
+
+---
+
+## How to Debug
+
+- Visit `https://mcp-google-ads-vtmp.onrender.com/docs`  
+  This should show the FastAPI Swagger UI. If `/keyword-ideas` is not listed, the new code is not deployed.
+- If you see the endpoint in `/docs` but still get 404, check for typos in the route or query params.
+
+---
+
+## What To Do Next
+
+1. **Double-check that you pushed the latest code.**
+2. **Trigger a manual redeploy on Render** (even if it says "deployed"—sometimes auto-deploys can lag).
+3. **Check `/docs` on your deployed URL** to confirm the endpoint is present.
+4. **If still not working, paste the output of:**
+   - `git log -1` (to confirm your latest commit)
+   - The Render deploy logs (any errors or warnings)
+
+---
+
+Let me know what you find at `/docs` and if a redeploy fixes it! If not, I’ll help you debug further.
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+Thank you for sharing the screenshot of your FastAPI docs. It confirms that **only** the `/` and `/list-accounts` endpoints are available on your deployed server. This means the `/keyword-ideas` endpoint is **not present in the deployed code**.
+
+### What This Means
+
+- The code you edited locally (with `/keyword-ideas`) is **not what’s running on Render**.
+- This is almost always due to one of these reasons:
+  1. The changes were not pushed to your remote repository.
+  2. Render is deploying from a different branch or an outdated commit.
+  3. The deploy failed and Render is running an old build.
+  4. The file you edited is not the one being used by the deployed app.
+
+---
+
+## How to Fix
+
+### 1. **Check Your Local Git Status**
+Run:
+```bash
+git status
+git log -1
+```
+- Make sure your changes to `google_ads_server.py` (with `/keyword-ideas`) are committed.
+
+### 2. **Push Your Changes**
+If you haven’t already, push your changes:
+```bash
+git add google_ads_server.py
+git commit -m "Add /keyword-ideas endpoint"
+git push
+```
+
+### 3. **Check Render Dashboard**
+- Make sure Render is set to deploy from the correct branch (usually `main`).
+- Trigger a manual deploy if needed.
+
+### 4. **Wait for Deploy to Complete**
+- Watch the deploy logs for errors.
+- Once complete, refresh `/docs` on your Render URL.  
+  You should see `/keyword-ideas` listed.
+
+---
+
+## Quick Checklist
+
+- [ ] Changes to `google_ads_server.py` are committed and pushed.
+- [ ] Render is deploying from the correct branch.
+- [ ] Deploy logs show a successful build.
+- [ ] `/docs` shows `/keyword-ideas` after redeploy.
+
+---
+
+**Once you see `/keyword-ideas` in `/docs`, your endpoint will be live!**  
+If you follow these steps and still don’t see it, let me know what you find in your git and deploy logs, and I’ll help you debug further.
+
+---
+
+_**User**_
+
+implement the fix
+
+---
+
+_**Assistant**_
+
+```bash
+git status
+```
+
+```
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .specstory/history/2025-07-15_00-19Z-can-i-deploy-this-proje
+ct-on-vercel.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+```
+
+---
+
+```bash
+git push
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git push
+Enumerating objects: 11, done.
+Counting objects: 100% (11/11), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 6.65 KiB | 6.65 MiB/s, done.
+Total 6 (delta 4), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (4/4), completed with 4 local objects.
+To https://github.com/jairodriguez/mcp-google-ads.git
+   ad14984..148d304  main -> main
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+The latest code (including the `/keyword-ideas` endpoint) has now been pushed to your remote repository.
+
+**Next steps:**
+1. Wait for Render to automatically redeploy your service (or trigger a manual deploy from the Render dashboard).
+2. Once the deploy completes, visit your `/docs` page again (`https://mcp-google-ads-vtmp.onrender.com/docs`).  
+   You should now see the `/keyword-ideas` endpoint listed.
+3. Test the endpoint with your desired parameters.
+
+If you still don’t see the endpoint after the deploy, let me know and we’ll debug further!
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+Great news! Your `/keyword-ideas` endpoint is now visible in the FastAPI docs on Render. This means your new code is deployed and the route is live.
+
+**You can now:**
+- Test the endpoint directly from the `/docs` page (try it out with your parameters).
+- Use `curl` or any HTTP client to call:
+  ```
+  https://mcp-google-ads-vtmp.onrender.com/keyword-ideas?customer_id=YOUR_ID&q=glamping&q=tents&geo=2484&lang=1003&limit=5
+  ```
+
+If you have any issues with the endpoint’s response, want to add more routes, or need help with formatting or error handling, just let me know! 🚀
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+The error message:
+```
+{"detail":"Google Ads error: could not locate runnable browser"}
+```
+means that the Google Ads API client is trying to run an OAuth flow that requires a browser (for user login/consent), but this is not possible in a headless server environment like Render.
+
+---
+
+## Why This Happens
+
+- **OAuth 2.0 (User Authentication)**:  
+  If your `GOOGLE_ADS_AUTH_TYPE` is set to `oauth` and the credentials/token are missing or expired, the code tries to launch a browser for user login.
+- **Service Account**:  
+  This does **not** require a browser and is the recommended method for server deployments.
+
+---
+
+## How to Fix
+
+### 1. **Use a Service Account for Server Deployments**
+- Set `GOOGLE_ADS_AUTH_TYPE=service_account` in your environment variables or `.env` file.
+- Make sure `GOOGLE_ADS_CREDENTIALS_PATH` points to your service account JSON key file.
+- Redeploy your service.
+
+### 2. **If You Must Use OAuth**
+- You need to generate and save a valid OAuth token **locally** (on your laptop, where a browser is available).
+- Then upload the token file to your server and set `GOOGLE_ADS_CREDENTIALS_PATH` to point to it.
+- But this is not recommended for headless/server deployments.
+
+---
+
+## What To Do Next
+
+1. **Check your `.env` or Render environment settings:**
+   - `GOOGLE_ADS_AUTH_TYPE=service_account`
+   - `GOOGLE_ADS_CREDENTIALS_PATH=/app/your-service-account.json`
+   - `GOOGLE_ADS_DEVELOPER_TOKEN=...`
+   - (and any other required Google Ads variables)
+
+2. **Upload your service account JSON to your repo or Render environment (securely).**
+
+3. **Redeploy.**
+
+---
+
+### If you need help generating a service account or configuring your environment, let me know!  
+Once you switch to a service account, this error will go away and your endpoint will work on Render.
+
+---
+
+_**User**_
+
+I have nop clue about where to pùt the GOOGLE_ADS_CREDENTIALS_PATH or  what to include there
+
+---
+
+_**Assistant**_
+
+No problem! Here’s a clear, step-by-step guide to set up your Google Ads credentials for a server deployment (like Render):
+
+---
+
+## 1. **What is `GOOGLE_ADS_CREDENTIALS_PATH`?**
+
+- It’s an environment variable that tells your app where to find your Google Ads credentials file.
+- For **service account** authentication, this should point to your **service account JSON key file** (downloaded from Google Cloud Console).
+
+---
+
+## 2. **How to Get a Service Account JSON Key**
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
+2. Select your project.
+3. Go to **IAM & Admin > Service Accounts**.
+4. Create a new service account (or select an existing one).
+5. Click **Keys** > **Add Key** > **Create new key**.
+6. Choose **JSON** and download the file.
+7. **This is your credentials file.**
+
+---
+
+## 3. **Where to Put the File**
+
+### **A. For Local Development**
+- Place the JSON file in your project directory (e.g., `service_account.json`).
+
+### **B. For Render Deployment**
+- **Best practice:** Add the contents of the JSON file as a Render Secret File.
+- **Alternative:** Add the file to your repo (not recommended for public repos).
+
+#### **Using Render Secret Files (Recommended)**
+1. In the Render dashboard, go to your service.
+2. Go to the **Environment** tab.
+3. Click **Add Secret File**.
+4. Name it something like `/etc/secrets/google-ads-service-account.json`.
+5. Paste the entire JSON file contents.
+6. Set your environment variable:
+   - `GOOGLE_ADS_CREDENTIALS_PATH=/etc/secrets/google-ads-service-account.json`
+
+#### **If You Add the File to Your Repo**
+- Place it in your project (e.g., `/app/service_account.json`).
+- Set:
+  - `GOOGLE_ADS_CREDENTIALS_PATH=/app/service_account.json`
+
+---
+
+## 4. **How to Set the Environment Variable**
+
+- In Render, go to your service > **Environment** tab.
+- Add a new environment variable:
+  - **Key:** `GOOGLE_ADS_CREDENTIALS_PATH`
+  - **Value:** (the path to your JSON file, as above)
+
+---
+
+## 5. **What Else to Set**
+
+You’ll also need:
+- `GOOGLE_ADS_AUTH_TYPE=service_account`
+- `GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token`
+- (optionally) `GOOGLE_ADS_LOGIN_CUSTOMER_ID=your_manager_account_id` (if using an MCC)
+
+---
+
+## **Summary Table**
+
+| Variable                      | Value (example)                                 |
+|-------------------------------|-------------------------------------------------|
+| GOOGLE_ADS_AUTH_TYPE          | service_account                                 |
+| GOOGLE_ADS_CREDENTIALS_PATH   | /etc/secrets/google-ads-service-account.json    |
+| GOOGLE_ADS_DEVELOPER_TOKEN    | your_developer_token                            |
+| GOOGLE_ADS_LOGIN_CUSTOMER_ID  | (optional, for MCC)                             |
+
+---
+
+**Once you set this up and redeploy, your app will authenticate with Google Ads using the service account and your endpoints will work!**
+
+If you need help with any of these steps (or want to do it locally first), let me know!
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+You're almost there! In the Render "Secret Files" section, you need to:
+
+1. **Paste the entire contents of your Google service account JSON key file** into the "Contents" box next to `/etc/secrets/google-ads-service-account.json`.
+
+2. **Save** the secret file.
+
+3. **Set the environment variable** in your Render service:
+   - Go to the **Environment** tab.
+   - Add a new environment variable:
+     - **Key:** `GOOGLE_ADS_CREDENTIALS_PATH`
+     - **Value:** `/etc/secrets/google-ads-service-account.json`
+
+4. **Set the authentication type** (if not already set):
+   - Add another environment variable:
+     - **Key:** `GOOGLE_ADS_AUTH_TYPE`
+     - **Value:** `service_account`
+
+5. **Make sure your other required variables are set** (like `GOOGLE_ADS_DEVELOPER_TOKEN`).
+
+6. **Redeploy** your service.
+
+---
+
+**Summary:**
+- The filename in your screenshot is correct.
+- Paste the JSON key file contents in the "Contents" box.
+- Set the environment variable to point to this file.
+- Redeploy.
+
+Once you do this, your Google Ads API authentication will work on Render! If you need help finding or generating the service account JSON, let me know.
+
+---
+
+_**User**_
+
+Environment variable keys must consist of alphabetic characters,digits, '_', '-', or '.', and must not start with a digit.
+
+---
+
+_**Assistant**_
+
+Great catch! The error message is about the **key** (the name of the environment variable), not the filename of your secret file.
+
+### Here’s what you need to do:
+
+- The **filename** for your secret file (e.g. `/etc/secrets/google-ads-service-account.json`) is correct and can include slashes and dashes.
+- The **environment variable key** (the name) must be something like `GOOGLE_ADS_CREDENTIALS_PATH` (letters, numbers, `_`, `-`, or `.`, and must not start with a digit).
+
+---
+
+## Step-by-step:
+
+1. **In the Secret Files section:**
+   - Filename: `/etc/secrets/google-ads-service-account.json`
+   - Contents: (Paste your service account JSON here)
+
+2. **In the Environment Variables section:**
+   - Key: `GOOGLE_ADS_CREDENTIALS_PATH`
+   - Value: `/etc/secrets/google-ads-service-account.json`
+
+   (Do **not** use slashes or special characters in the key—just letters, numbers, `_`, `-`, or `.`)
+
+---
+
+**Summary Table:**
+
+| Type                | Example Value                                 |
+|---------------------|-----------------------------------------------|
+| Secret File Name    | `/etc/secrets/google-ads-service-account.json`|
+| Env Var Key         | `GOOGLE_ADS_CREDENTIALS_PATH`                |
+| Env Var Value       | `/etc/secrets/google-ads-service-account.json`|
+
+---
+
+**Once you set it up this way, the error will go away and your app will be able to find the credentials file!**  
+Let me know if you need help with the Render UI or want a screenshot example.
+
+---
+
+_**User**_
+
+for some reason it doesn't like /etc/secrets/google-ads-service-account.json
+
+---
+
+_**Assistant**_
+
+No worries! Here’s what’s happening and how to resolve it:
+
+---
+
+## 1. **Render Secret File Path Rules**
+
+- **Render allows you to specify any path for your secret file** (e.g., `/etc/secrets/google-ads-service-account.json`), but:
+  - The path must be valid for the container’s filesystem.
+  - Some characters or subfolders may cause issues, especially if the parent directory doesn’t exist or isn’t writable.
+
+---
+
+## 2. **Best Practice: Use a Simpler Path**
+
+Try using a simpler path for your secret file, such as:
+- `/etc/google-ads-service-account.json`
+- `/secrets/google-ads-service-account.json`
+- `/tmp/google-ads-service-account.json`
+- Or even just: `/google-ads-service-account.json`
+
+**Update both:**
+- The filename in the Render Secret File UI
+- The value of your `GOOGLE_ADS_CREDENTIALS_PATH` environment variable
+
+---
+
+## 3. **How to Set It Up**
+
+1. **Secret File**
+   - Filename: `/etc/google-ads-service-account.json`
+   - Contents: (Paste your JSON key)
+
+2. **Environment Variable**
+   - Key: `GOOGLE_ADS_CREDENTIALS_PATH`
+   - Value: `/etc/google-ads-service-account.json`
+
+---
+
+## 4. **Redeploy**
+
+After making these changes, redeploy your service.
+
+---
+
+## 5. **If You Still Have Issues**
+
+- Try an even simpler path, like `/google-ads-service-account.json`.
+- Double-check that the environment variable matches the secret file path exactly.
+
+---
+
+**Summary:**  
+Use a simple, top-level path for your secret file and make sure your environment variable matches it. This will resolve most path-related issues on Render.
+
+If you still get an error, let me know the exact error message and I’ll help you troubleshoot further!
+
+---
+
+_**User**_
+
+doesn't like /google-ads-service-account.json neither
+
+---
+
+_**Assistant**_
+
+If Render is rejecting both `/etc/secrets/google-ads-service-account.json` and `/google-ads-service-account.json` as secret file paths, it’s likely due to one of these reasons:
+
+1. **Path must not start with a slash** (sometimes Render expects a relative path, not absolute).
+2. **Path must be within a writable directory** (like `/etc/secrets/`, `/secrets/`, or just the project root).
+
+---
+
+## What to Try
+
+### 1. **Use a Relative Path (No Leading Slash)**
+- Try: `google-ads-service-account.json`
+- Or: `secrets/google-ads-service-account.json` (if you want a subfolder)
+
+### 2. **Update the Environment Variable**
+- Set `GOOGLE_ADS_CREDENTIALS_PATH` to match exactly (e.g., `google-ads-service-account.json`).
+
+### 3. **Check Render’s Documentation**
+- Render’s [Secret Files documentation](https://render.com/docs/environment-variables#secret-files) says:
+  > “You can specify any path, but we recommend using `/etc/secrets/<filename>` for consistency.”
+- If `/etc/secrets/` is not working, try just the filename.
+
+---
+
+## Example
+
+**Secret File:**
+- Filename: `google-ads-service-account.json`
+- Contents: (your JSON)
+
+**Environment Variable:**
+- Key: `GOOGLE_ADS_CREDENTIALS_PATH`
+- Value: `google-ads-service-account.json`
+
+---
+
+## After Setting
+
+- Redeploy your service.
+- Your app will find the file at the root of the working directory.
+
+---
+
+## If You Still Get an Error
+
+- Please copy the **exact error message** you see in the Render UI or logs.
+- Let me know if the error is during file creation, reading, or a different step.
+
+---
+
+**Summary:**  
+Try using just the filename (no leading slash) for both the secret file and the environment variable.  
+If it still fails, share the error message and I’ll help you debug further!
+
+---
+
+_**User**_
+
+i saved it as nomadixgear-parse-emails-4a20c1d08701.json
+
+---
+
+_**Assistant**_
+
+Perfect! Now that you’ve saved your service account key as `nomadixgear-parse-emails-4a20c1d08701.json` in Render’s Secret Files, here’s what you need to do:
+
+---
+
+## 1. **Set the Environment Variable**
+
+In your Render service’s **Environment** tab, add:
+
+- **Key:** `GOOGLE_ADS_CREDENTIALS_PATH`
+- **Value:** `nomadixgear-parse-emails-4a20c1d08701.json`
+
+*(No slashes, just the filename, since Render mounts secret files in the working directory by default if you don’t specify a path.)*
+
+---
+
+## 2. **Set Other Required Variables**
+
+Make sure you also have:
+
+- `GOOGLE_ADS_AUTH_TYPE=service_account`
+- `GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token`
+- (Optionally) `GOOGLE_ADS_LOGIN_CUSTOMER_ID=your_manager_account_id` (if you use an MCC)
+
+---
+
+## 3. **Redeploy Your Service**
+
+After saving these settings, trigger a redeploy on Render.
+
+---
+
+## 4. **Test Your Endpoint**
+
+Once deployed, try your `/keyword-ideas` endpoint again.  
+If everything is set up correctly, you should get real keyword ideas back!
+
+---
+
+**If you get any errors, copy the exact error message here and I’ll help you debug further.**  
+You’re very close—just make sure the environment variable matches the filename exactly!
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+You are now getting this error:
+```
+"Google Ads error: ('unauthorized_client: Client is unauthorized to retrieve access tokens using this method, or client not authorized for any of the scopes requested.', ...)"
+```
+
+This means your service account is not authorized to access the Google Ads API. This is a common Google Ads API setup issue.
+
+---
+
+## How to Fix: Service Account "unauthorized_client" Error
+
+### 1. **Enable the Google Ads API for Your Project**
+- Go to the [Google Cloud Console](https://console.cloud.google.com/).
+- Make sure you are in the correct project (the one your service account belongs to).
+- Go to **APIs & Services > Library**.
+- Search for **Google Ads API** and make sure it is **enabled**.
+
+### 2. **Grant Access to the Service Account in Google Ads**
+- Service accounts **must be added as users** to the Google Ads account (or MCC/manager account) you want to access.
+- In your [Google Ads account](https://ads.google.com/):
+  - Go to **Tools & Settings > Access and security**.
+  - Click **+** to add a user.
+  - Add the **service account’s email address** (from your JSON file) as a user.
+  - Assign it the **Standard** or **Admin** role (it must have API access).
+  - Accept the invitation from the service account’s email (if required).
+
+### 3. **Check Scopes in Your Code**
+- Your code should use the correct scope:
+  ```
+  SCOPES = ['https://www.googleapis.com/auth/adwords']
+  ```
+- This is already correct in your code.
+
+### 4. **Check Developer Token**
+- Make sure your `GOOGLE_ADS_DEVELOPER_TOKEN` is valid and approved for production use (test tokens have limitations).
+
+### 5. **Check Customer ID**
+- The `customer_id` you use must be accessible by the service account (i.e., the account or sub-account where you added the service account as a user).
+
+---
+
+## Summary Table
+
+| Step | What to Check/Do                                                                 |
+|------|----------------------------------------------------------------------------------|
+| 1    | Google Ads API is enabled in Google Cloud Console                                |
+| 2    | Service account email is added as a user in Google Ads (with API access)         |
+| 3    | Scopes in code are correct (`https://www.googleapis.com/auth/adwords`)           |
+| 4    | Developer token is valid and approved                                            |
+| 5    | Customer ID is accessible by the service account                                 |
+
+---
+
+**Once you complete these steps, redeploy and try again.**  
+If you still get an error, let me know exactly which step you’re stuck on or what the new error says!
+
+---
+
+_**User**_
+
+where is this?   SCOPES = ['https://www.googleapis.com/auth/adwords']
+
+---
+
+_**Assistant**_
+
+The line  
+```python
+SCOPES = ['https://www.googleapis.com/auth/adwords']
+```
+is defined near the top of your `google_ads_server.py` file. This variable sets the OAuth scope for Google Ads API access.
+
+---
+
+## Where to Find and Edit It
+
+1. **Open** `google_ads_server.py`
+2. **Look near the top** (after the imports and before most function definitions).  
+   You should see:
+   ```python
+   SCOPES = ['https://www.googleapis.com/auth/adwords']
+   API_VERSION = "v19"  # Google Ads API version
+   ```
+
+---
+
+## What Does It Do?
+
+- This line tells Google’s auth libraries what permissions your app is requesting.
+- `'https://www.googleapis.com/auth/adwords'` is the correct scope for the Google Ads API.
+
+---
+
+## When Would You Change It?
+
+- **You should not need to change this** for standard Google Ads API access.
+- If Google updates their documentation to use a new scope, you would update it here.
+
+---
+
+**If you’re still getting “unauthorized_client” errors, the problem is almost always with service account permissions or Google Ads user access, not the scope string.**  
+Let me know if you want to see the exact lines in your file or need help with the next troubleshooting step!
+
+---
+
+_**User**_
+
+I don't know about this, I figure the refresh token expires: Developer token is valid and approved
+
+---
+
+_**Assistant**_
+
+Thank you for clarifying! Here’s what you need to know:
+
+---
+
+## 1. **Service Account vs. OAuth Refresh Token**
+
+- **Service Account** authentication (what you’re using for server deployments) **does not use a refresh token**.  
+  It uses a private key to generate new tokens as needed, so you never have to worry about refresh token expiry.
+- **OAuth** authentication (for user-based flows) **does use a refresh token**, but this is not relevant for service accounts.
+
+---
+
+## 2. **If You’re Using a Service Account**
+
+- The error you’re seeing is **not** about a refresh token.
+- It’s about the service account not being authorized to access the Google Ads API for the customer/account you’re targeting.
+
+---
+
+## 3. **What You Need to Do**
+
+### **A. Add the Service Account as a User in Google Ads**
+1. Open your [Google Ads account](https://ads.google.com/).
+2. Go to **Tools & Settings > Access and security**.
+3. Click the blue “+” button to add a user.
+4. Enter the **service account’s email address** (from your JSON key file).
+5. Assign it the **Standard** or **Admin** role.
+6. Complete the invitation process (sometimes you need to accept the invite from the service account’s email, but often this is not required for service accounts).
+
+### **B. Make Sure the API is Enabled in Google Cloud**
+- In the [Google Cloud Console](https://console.cloud.google.com/), make sure the **Google Ads API** is enabled for your project.
+
+### **C. Double-Check Your Developer Token**
+- You said your developer token is valid and approved—great!  
+  Just make sure it’s not a test token (test tokens have limited access).
+
+---
+
+## 4. **Summary Table**
+
+| Step | What to Check/Do                                                                 |
+|------|----------------------------------------------------------------------------------|
+| 1    | Add service account email as a user in Google Ads (Standard or Admin role)       |
+| 2    | Enable Google Ads API in Google Cloud Console                                    |
+| 3    | Use a valid, approved developer token                                            |
+
+---
+
+**Once you do this, your service account will be able to access the Google Ads API and your endpoint will work!**
+
+If you need step-by-step help with any of these, just ask!
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+Thank you for sharing the screenshots! Here’s what I see and what’s missing:
+
+---
+
+## What’s Set Up Correctly
+
+- **Google Ads API is enabled** in your Google Cloud project (`Nomadixgear`).
+- **You (jairo@nomadixgear.com)** are an Admin on your Google Ads account.
+
+---
+
+## What’s Missing
+
+**Your service account email is NOT listed as a user in your Google Ads account.**
+
+- The users shown are only regular email addresses (not a service account).
+- A service account email looks like:  
+  `something@something.iam.gserviceaccount.com`
+
+---
+
+## What You Need To Do
+
+### 1. **Find Your Service Account Email**
+- Open your service account JSON file.
+- Look for the `"client_email"` field, e.g.:
+  ```
+  "client_email": "my-service-account@my-project.iam.gserviceaccount.com"
+  ```
+
+### 2. **Add the Service Account as a User in Google Ads**
+1. Go to **Tools & Settings > Access and security** in your Google Ads account.
+2. Click the blue “+” button to add a user.
+3. Paste the **service account email** (from above) as the new user.
+4. Assign it the **Standard** or **Admin** role.
+5. Complete the invitation process (no need to accept from the service account).
+
+### 3. **Wait a Few Minutes, Then Test Again**
+- Once the service account is added, your API calls should work.
+
+---
+
+## Why This Is Required
+
+- Google Ads requires that any API user (including service accounts) be explicitly added as a user to the account or MCC.
+- Until you do this, you will get the “unauthorized_client” error.
+
+---
+
+**Once you add the service account as a user, your Render deployment should work!**  
+If you need help finding your service account email or adding it, let me know!
+
+---
+
+_**User**_
+
+mcp-google-ads@nomadixgear-parse-emails.iam.gserviceaccount.com
+
+---
+
+_**Assistant**_
+
+Perfect!  
+That is your **service account email**:  
+```
+mcp-google-ads@nomadixgear-parse-emails.iam.gserviceaccount.com
+```
+
+---
+
+## Next Steps
+
+1. **Go to your Google Ads account**  
+   (Tools & Settings → Access and security)
+
+2. **Click the blue “+” button** to add a new user.
+
+3. **Paste**  
+   ```
+   mcp-google-ads@nomadixgear-parse-emails.iam.gserviceaccount.com
+   ```
+   as the email address.
+
+4. **Assign the role**  
+   - Choose **Standard** or **Admin** (either is fine for API access).
+
+5. **Send the invitation**  
+   - For service accounts, you do **not** need to accept the invite from the email inbox.
+
+6. **Wait a few minutes** for Google Ads to process the new user.
+
+7. **Test your API call again** (your `/keyword-ideas` endpoint).
+
+---
+
+**Once the service account is added as a user, your API calls from Render should work!**
+
+If you run into any issues or see a new error, let me know and I’ll help you debug further.
+
+---
+
+_**User**_
+
+this got stuck for a long time bernardojrodriguez@Mac mcp-google-ads % curl "https://mcp-google-ads-vtmp.onrender.com/keyword-ideas?customer_id=9197949842&q=glamping&q=tents&geo=2484&lang=1003&limit=5"
+
+---
+
+_**Assistant**_
+
+If your `curl` request to the `/keyword-ideas` endpoint is hanging (taking a long time with no response), here are the most likely causes and how to troubleshoot:
+
+---
+
+## Common Causes for a Hanging Request
+
+1. **Google Ads API is waiting for a response or timing out.**
+   - If the service account is newly added, Google’s backend may take a few minutes to propagate permissions.
+   - If the account or developer token is not fully authorized, the API may hang before returning an error.
+
+2. **Network or firewall issues on Render.**
+   - Rare, but possible if Render cannot reach Google’s API endpoints.
+
+3. **Code is not handling errors or timeouts properly.**
+   - If the Google Ads API call hangs, your FastAPI endpoint will also hang.
+
+4. **Very large or complex query.**
+   - Unlikely with a simple keyword ideas request, but possible if the account has a huge amount of data.
+
+---
+
+## What To Do
+
+### 1. **Wait a Few Minutes and Try Again**
+- Sometimes Google Ads permissions take a few minutes to propagate after adding a new user.
+
+### 2. **Check Render Logs**
+- Go to your Render dashboard.
+- Check the logs for your service while the request is running.
+- Look for any error messages, stack traces, or repeated warnings.
+
+### 3. **Add a Timeout to Your Requests**
+- In your code, you can add a timeout to the `requests.post` call to avoid hanging forever:
+  ```python
+  response = requests.post(url, headers=headers, json=payload, timeout=30)
+  ```
+- This will raise an exception if the request takes longer than 30 seconds, allowing you to return a proper error message.
+
+### 4. **Test Other Endpoints**
+- Try hitting `/` or `/list-accounts` to see if those endpoints respond quickly.
+- If they do, the problem is specific to the Google Ads API call.
+
+### 5. **Check Google Ads API Quotas**
+- If you’ve made many requests, you might be rate-limited (rare for most users).
+
+---
+
+## Next Steps
+
+1. **Wait a few minutes and retry.**
+2. **Check your Render logs for clues.**
+3. **(Optional) Add a timeout to your API call in the code.**
+4. **Let me know if you see any error messages in the logs or if the problem persists.**
+
+---
+
+If you share the relevant part of your Render logs while the request is hanging, I can help you pinpoint the issue!
+
+---
+
+_**User**_
+
+also, look at the customer id's
+
+---
+
+_**Assistant**_
+
+Great observation! Here’s what you need to know about **Customer IDs** in Google Ads and how they relate to your API calls:
+
+---
+
+## 1. **Customer IDs in Google Ads**
+
+- **Manager Account (MCC):**  
+  - Your manager account ID is: `384-065-6000`
+- **Client Account:**  
+  - Your client account ID is: `919-794-9842`
+
+When you add a user (including a service account), you must select which account(s) to give access to.  
+**If you want your API to access data for `919-794-9842`, your service account must be added as a user to that account.**
+
+---
+
+## 2. **Which Customer ID to Use in API Calls?**
+
+- If you want to access the client account, use:  
+  `customer_id=9197949842` (no dashes)
+- If you want to access the manager account, use:  
+  `customer_id=3840656000` (no dashes)
+- **You must add your service account as a user to the account you want to access.**
+
+---
+
+## 3. **What to Do When Adding the Service Account**
+
+- In your screenshot, you are about to add a user.
+- **Select the correct account** (e.g., `919-794-9842` if you want to access that account’s data).
+- Enter your service account email:  
+  `mcp-google-ads@nomadixgear-parse-emails.iam.gserviceaccount.com`
+- Assign the **Standard** or **Admin** role.
+- Send the invitation.
+
+---
+
+## 4. **After Adding the Service Account**
+
+- Wait a few minutes for permissions to propagate.
+- Use the correct `customer_id` in your API calls (matching the account you added the service account to).
+- Test your endpoint again.
+
+---
+
+## 5. **If You Want to Access Multiple Accounts**
+
+- Add the service account as a user to each account you want to access.
+- For manager accounts (MCC), you can use the manager account ID as `login-customer-id` and access sub-accounts if permissions are set up.
+
+---
+
+**Summary:**  
+- Make sure your service account is added as a user to the correct customer ID (account).
+- Use that customer ID (no dashes) in your API calls.
+- Wait a few minutes after adding before testing.
+
+If you do this and still have issues, let me know the exact error or behavior you see!
+
+---
+
+_**User**_
+
+it says it already exists but doesn't appear in the list of accounts
+
+---
+
+_**Assistant**_
+
+Great job getting this far! The message “Item already existed” means your service account was already added as a user to the Google Ads account, but Google Ads does **not** show service accounts in the regular user list in the UI. This is a known quirk of the Google Ads interface.
+
+---
+
+## What This Means
+
+- **Your service account is already added and has access.**
+- Service accounts are “invisible” in the user list in the Google Ads UI, but the API recognizes them.
+- You do **not** need to add it again.
+
+---
+
+## What to Do Next
+
+1. **Wait a few minutes** (sometimes up to 10–15) for Google’s backend to propagate the permissions.
+2. **Try your API call again** (your `/keyword-ideas` endpoint).
+3. **If it still hangs or errors after 15 minutes:**
+   - Check your Render logs for any new error messages.
+   - Try a very simple API call (like listing accounts) to see if the service account works for any endpoint.
+
+---
+
+## Troubleshooting Tips
+
+- If you get a permissions or “unauthorized” error, double-check:
+  - The `customer_id` you’re using matches the account where the service account was added.
+  - Your developer token is approved and not in test mode.
+- If it hangs, check for network issues or quota limits in the Google Cloud Console.
+
+---
+
+**Summary:**  
+- “Item already existed” is normal for service accounts.
+- They won’t show in the user list, but they do have access.
+- Wait a few minutes, then test your API again.
+
+If you still have issues after waiting, let me know the exact error or behavior and I’ll help you debug further!
+
+---
+
+_**User**_
+
+remind me of the curl
+
+---
+
+_**Assistant**_
+
+Absolutely! Here’s the `curl` command to test your `/keyword-ideas` endpoint:
+
+```bash
+curl "https://mcp-google-ads-vtmp.onrender.com/keyword-ideas?customer_id=9197949842&q=glamping&q=tents&geo=2484&lang=1003&limit=5"
+```
+
+**Replace the values as needed:**
+- `customer_id=9197949842` — your Google Ads account ID (no dashes)
+- `q=glamping&q=tents` — one or more seed keywords (repeat `q` for each keyword)
+- `geo=2484` — Geo target constant (2484 = Mexico)
+- `lang=1003` — Language constant (1003 = Spanish)
+- `limit=5` — Maximum number of ideas to return
+
+---
+
+**If you get a response, your service account and API setup are working!**  
+If you get an error, copy it here and I’ll help you debug further.
+
+---
+
+_**User**_
+
+hangs forever
+
+---
+
+_**Assistant**_
+
+If your `/keyword-ideas` endpoint hangs forever, even after the service account is added, here’s what to do next:
+
+---
+
+## 1. **Check Render Logs**
+- Go to your Render dashboard.
+- Open your service’s logs while you make the request.
+- Look for:
+  - Any error messages
+  - Stack traces
+  - Warnings
+  - Repeated lines
+
+**Paste any relevant log output here**—it will help diagnose the issue.
+
+---
+
+## 2. **Add a Timeout to the API Call**
+To prevent your FastAPI server from hanging forever, add a timeout to your `requests.post` call in `google_ads_server.py`:
+
+```python
+response = requests.post(url, headers=headers, json=payload, timeout=30)
+```
+This will raise an exception if the request takes longer than 30 seconds, and you’ll get a clear error message.
+
+---
+
+## 3. **Test a Simpler Endpoint**
+Try calling `/list-accounts`:
+```bash
+curl "https://mcp-google-ads-vtmp.onrender.com/list-accounts"
+```
+- If this also hangs, the issue is with authentication or network.
+- If this works, the problem is specific to the keyword ideas endpoint.
+
+---
+
+## 4. **Double-Check Service Account Permissions**
+- Make sure the service account is added to the **correct customer ID** (the one you’re using in the API call).
+- Wait at least 10–15 minutes after adding the service account.
+
+---
+
+## 5. **Check Google Ads API Quotas**
+- In rare cases, you may be rate-limited or blocked by Google. Check the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) for quota errors.
+
+---
+
+## 6. **Try a Minimal GAQL Query**
+Try using the `/run-gaql` endpoint with a very simple query to see if any Google Ads API call works.
+
+---
+
+## 7. **If All Else Fails**
+- Share the output of the Render logs here.
+- Let me know if `/list-accounts` or any other endpoint works.
+
+---
+
+**Summary:**  
+- Check logs for errors.
+- Add a timeout to your API call.
+- Test `/list-accounts`.
+- Double-check service account permissions and wait a bit longer.
+- Share any new error messages for further help.
+
+Let me know what you find in the logs or if `/list-accounts` works!
+
+---
+
+_**User**_
+
+2025-07-15T01:25:31.693273555Z INFO:     Application startup complete.
+2025-07-15T01:25:31.77959668Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
+2025-07-15T01:25:35.297686923Z INFO:     10.204.131.23:0 - "GET /keyword-ideas?customer_id=9197949842&q=glamping&q=tents&geo=2484&lang=1003&limit=5 HTTP/1.1" 404 Not Found
+2025-07-15T01:28:07.661379798Z INFO:     10.204.198.192:0 - "GET /docs HTTP/1.1" 200 OK
+2025-07-15T01:28:08.174417379Z INFO:     10.204.169.118:0 - "GET /openapi.json HTTP/1.1" 200 OK
+2025-07-15T01:32:58.505483699Z ==> Deploying...
+2025-07-15T01:33:13.380889885Z 2025-07-15 01:33:13,380 - google_ads_server - INFO - Environment variables loaded from .env file
+2025-07-15T01:33:13.572927402Z INFO:     Started server process [1]
+2025-07-15T01:33:13.572975773Z INFO:     Waiting for application startup.
+2025-07-15T01:33:13.573234679Z INFO:     Application startup complete.
+2025-07-15T01:33:13.573857874Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
+2025-07-15T01:33:13.791585258Z INFO:     127.0.0.1:41852 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+2025-07-15T01:33:19.145228608Z INFO:     Shutting down
+2025-07-15T01:33:19.172186105Z ==> Your service is live 🎉
+2025-07-15T01:33:19.199420724Z ==> 
+2025-07-15T01:33:19.225864372Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T01:33:19.245669507Z INFO:     Waiting for application shutdown.
+2025-07-15T01:33:19.245737501Z INFO:     Application shutdown complete.
+2025-07-15T01:33:19.245808625Z INFO:     Finished server process [1]
+2025-07-15T01:33:19.249046802Z ==> 
+2025-07-15T01:33:19.27494537Z ==> Available at your primary URL https://mcp-google-ads-vtmp.onrender.com
+2025-07-15T01:33:19.299503179Z ==> 
+2025-07-15T01:33:19.323215708Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T01:33:20.139435751Z INFO:     10.204.131.23:0 - "GET / HTTP/1.1" 200 OK
+2025-07-15T01:34:30.133304433Z ==> Deploying...
+2025-07-15T01:34:52.455886234Z 2025-07-15 01:34:52,455 - google_ads_server - INFO - Environment variables loaded from .env file
+2025-07-15T01:34:52.653607715Z INFO:     Started server process [1]
+2025-07-15T01:34:52.654267104Z INFO:     Waiting for application startup.
+2025-07-15T01:34:52.654280775Z INFO:     Application startup complete.
+2025-07-15T01:34:52.654755189Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
+2025-07-15T01:34:53.383036296Z INFO:     127.0.0.1:60950 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+2025-07-15T01:35:00.861478075Z INFO:     Shutting down
+2025-07-15T01:35:00.961859664Z INFO:     Waiting for application shutdown.
+2025-07-15T01:35:00.962192282Z INFO:     Application shutdown complete.
+2025-07-15T01:35:00.962213642Z INFO:     Finished server process [1]
+2025-07-15T01:35:01.151167967Z ==> Your service is live 🎉
+2025-07-15T01:35:01.216871015Z ==> 
+2025-07-15T01:35:01.283817352Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T01:35:01.33249221Z ==> 
+2025-07-15T01:35:01.383121107Z ==> Available at your primary URL https://mcp-google-ads-vtmp.onrender.com
+2025-07-15T01:35:01.431133595Z ==> 
+2025-07-15T01:35:01.479120493Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T01:35:05.898738423Z INFO:     10.204.131.23:0 - "GET / HTTP/1.1" 200 OK
+2025-07-15T01:40:00.337491453Z ==> Detected service running on port 10000
+2025-07-15T01:40:00.440148348Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-15T01:42:39.43400429Z INFO:     10.204.131.23:0 - "GET /docs HTTP/1.1" 200 OK
+2025-07-15T01:42:40.016257743Z INFO:     10.204.198.192:0 - "GET /openapi.json HTTP/1.1" 200 OK
+2025-07-15T01:45:53.750732408Z 2025-07-15 01:45:53,750 - google_ads_server - INFO - Using authentication type: oauth
+2025-07-15T01:45:53.753336354Z 2025-07-15 01:45:53,753 - google_ads_server - INFO - Creating OAuth client config from environment variables
+2025-07-15T01:45:53.753470868Z 2025-07-15 01:45:53,753 - google_ads_server - INFO - Starting OAuth authentication flow
+2025-07-15T01:45:53.761691657Z INFO:     10.204.198.192:0 - "GET /keyword-ideas?customer_id=9197949842&q=glamping&q=tents&geo=2484&lang=1003&limit=5 HTTP/1.1" 500 Internal Server Error
+2025-07-15T01:58:03.3927948Z ==> Deploying...
+2025-07-15T01:58:19.177425005Z INFO:     Started server process [1]
+2025-07-15T01:58:19.177517978Z INFO:     Waiting for application startup.
+2025-07-15T01:58:19.177683242Z INFO:     Application startup complete.
+2025-07-15T01:58:19.266879961Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
+2025-07-15T01:58:20.19210533Z INFO:     127.0.0.1:50756 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+2025-07-15T01:58:23.957439834Z INFO:     Shutting down
+2025-07-15T01:58:24.01697986Z ==> Your service is live 🎉
+2025-07-15T01:58:24.045586519Z ==> 
+2025-07-15T01:58:24.058092493Z INFO:     Waiting for application shutdown.
+2025-07-15T01:58:24.058362031Z INFO:     Application shutdown complete.
+2025-07-15T01:58:24.058486105Z INFO:     Finished server process [1]
+2025-07-15T01:58:24.073471377Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T01:58:24.098453106Z ==> 
+2025-07-15T01:58:24.123052855Z ==> Available at your primary URL https://mcp-google-ads-vtmp.onrender.com
+2025-07-15T01:58:24.151198404Z ==> 
+2025-07-15T01:58:24.176867953Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T01:58:25.187069435Z INFO:     10.204.198.192:0 - "GET / HTTP/1.1" 200 OK
+2025-07-15T02:03:27.412008076Z ==> Detected service running on port 10000
+2025-07-15T02:03:27.505246917Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-15T02:05:46.853959046Z ==> Deploying...
+2025-07-15T02:06:06.207612958Z 2025-07-15 02:06:06,207 - google_ads_server - INFO - Environment variables loaded from .env file
+2025-07-15T02:06:06.312875549Z INFO:     Started server process [1]
+2025-07-15T02:06:06.312895269Z INFO:     Waiting for application startup.
+2025-07-15T02:06:06.313107383Z INFO:     Application startup complete.
+2025-07-15T02:06:06.313682105Z INFO:     Uvicorn running on http://0.0.0.0:10000 (Press CTRL+C to quit)
+2025-07-15T02:06:06.639508363Z INFO:     127.0.0.1:39968 - "HEAD / HTTP/1.1" 405 Method Not Allowed
+2025-07-15T02:06:07.762838873Z INFO:     Shutting down
+2025-07-15T02:06:07.805713136Z ==> Your service is live 🎉
+2025-07-15T02:06:07.834145325Z ==> 
+2025-07-15T02:06:07.858695163Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T02:06:07.863736086Z INFO:     Waiting for application shutdown.
+2025-07-15T02:06:07.863755626Z INFO:     Application shutdown complete.
+2025-07-15T02:06:07.863759207Z INFO:     Finished server process [1]
+2025-07-15T02:06:07.883428142Z ==> 
+2025-07-15T02:06:07.907209481Z ==> Available at your primary URL https://mcp-google-ads-vtmp.onrender.com
+2025-07-15T02:06:08.118849732Z ==> 
+2025-07-15T02:06:08.141608121Z ==> ///////////////////////////////////////////////////////////
+2025-07-15T02:06:09.143394587Z INFO:     10.204.169.118:0 - "GET / HTTP/1.1" 200 OK
+2025-07-15T02:07:29.82238849Z 2025-07-15 02:07:29,822 - google_ads_server - INFO - Using authentication type: service_account
+2025-07-15T02:07:29.822419971Z 2025-07-15 02:07:29,822 - google_ads_server - INFO - Loading service account credentials from nomadixgear-parse-emails-4a20c1d08701.json
+2025-07-15T02:07:29.824123304Z 2025-07-15 02:07:29,823 - google_ads_server - INFO - Impersonating user: changizin@gmail.com
+2025-07-15T02:07:30.160636536Z INFO:     10.204.198.192:0 - "GET /keyword-ideas?customer_id=9197949842&q=glamping&q=tents&geo=2484&lang=1003&limit=5 HTTP/1.1" 500 Internal Server Error
+2025-07-15T02:11:14.553516748Z ==> Detected service running on port 10000
+2025-07-15T02:11:14.686898015Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2025-07-15T02:22:30.485942732Z INFO:     Shutting down
+2025-07-15T02:22:30.586379111Z INFO:     Waiting for application shutdown.
+2025-07-15T02:22:30.586409481Z INFO:     Application shutdown complete.
+2025-07-15T02:22:30.586503773Z INFO:     Finished server process [1]
+
+---
+
+_**Assistant**_
+
+Your logs reveal the following key points:
+
+1. **You are now using service account authentication:**
+   ```
+   Using authentication type: service_account
+   Loading service account credentials from nomadixgear-parse-emails-4a20c1d08701.json
+   Impersonating user: changizin@gmail.com
+   ```
+
+2. **The `/keyword-ideas` endpoint returns a 500 Internal Server Error:**
+   ```
+   "GET /keyword-ideas?... HTTP/1.1" 500 Internal Server Error
+   ```
+
+---
+
+## What’s Happening
+
+- You are using the `impersonation_email` feature (`Impersonating user: changizin@gmail.com`).
+- If `changizin@gmail.com` is not a user on the Google Ads account, or does not have the right permissions, the API call will fail.
+- The 500 error means something went wrong in your code or with the Google Ads API call.
+
+---
+
+## What To Do Next
+
+### 1. **Check the Impersonation Email**
+- Is `changizin@gmail.com` the correct user to impersonate?
+- Is this email a user on the Google Ads account (`919-794-9842`) with the right permissions?
+- If you do **not** need to impersonate a user, **remove the `GOOGLE_ADS_IMPERSONATION_EMAIL` environment variable** from your Render settings.
+
+### 2. **Check the Error Details**
+- The log does not show the full error message. Update your code to log the exception details in the `/keyword-ideas` endpoint and redeploy. For example:
+  ```python
+  except Exception as e:
+      import traceback
+      logger.error(traceback.format_exc())
+      raise HTTPException(500, f"Google Ads error: {e}")
+  ```
+- This will help you see the real cause of the 500 error in the logs.
+
+### 3. **Try Without Impersonation**
+- Remove or unset the `GOOGLE_ADS_IMPERSONATION_EMAIL` environment variable.
+- Redeploy and test again.
+
+---
+
+## Summary Table
+
+| Step | What to Check/Do                                                                 |
+|------|----------------------------------------------------------------------------------|
+| 1    | Remove or correct `GOOGLE_ADS_IMPERSONATION_EMAIL` if not needed                 |
+| 2    | Make sure the impersonated user is a user on the Google Ads account              |
+| 3    | Add better error logging to see the real error                                   |
+| 4    | Redeploy and test again                                                          |
+
+---
+
+**Once you do this, you should either get a successful response or a more informative error message.**  
+If you get a new error, paste the full error log here and I’ll help you debug further!
+
+---
+
+_**User**_
+
+proceed to Update your code to log the exception details in the /keyword-ideas endpoint 
+
+---
+
+_**Assistant**_
+
+
+
+---
+
