@@ -12,6 +12,10 @@ from google.auth.transport.requests import Request
 from google.auth.exceptions import RefreshError
 import logging
 
+from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
+import uvicorn
+
 # MCP
 from mcp.server.fastmcp import FastMCP
 
@@ -1451,6 +1455,23 @@ async def list_resources(
     # Use your existing run_gaql function to execute this query
     return await run_gaql(customer_id, query)
 
+app = FastAPI()
+
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "MCP Google Ads API is running"}
+
+@app.get("/list-accounts", response_class=PlainTextResponse)
+async def list_accounts_endpoint():
+    return await list_accounts()
+
+# To expose more MCP tools, add similar endpoints:
+# @app.get("/run-gaql", response_class=PlainTextResponse)
+# async def run_gaql_endpoint(customer_id: str, query: str, format: str = "table"):
+#     return await run_gaql(customer_id, query, format)
+
 if __name__ == "__main__":
     # Start the MCP server on stdio transport
     mcp.run(transport="stdio")
+    # Optionally, you can also run the FastAPI app locally for testing:
+    # uvicorn.run(app, host="0.0.0.0", port=8080)
