@@ -52,5 +52,6 @@ site/
 *.log
 
 google_ads_token.json
+nomadixgear-parse-emails-4a20c1d08701.json
 
 uv.lock

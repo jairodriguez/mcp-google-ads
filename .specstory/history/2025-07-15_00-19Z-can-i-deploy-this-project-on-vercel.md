@@ -3070,3 +3070,610 @@ Let me know your priority!
 
 ---
 
+_**User**_
+
+proceed to Update Dockerfile to use $PORT for all endpoints to work reliably.
+
+---
+
+_**Assistant**_
+
+```diff
+      # Vercel passes $PORT at runtime; default to 8080 locally
+      ENV PORT=8080
+-     CMD ["uvicorn", "google_ads_server:app", "--host", "0.0.0.0", "--port", "8080"]
++     CMD ["sh", "-c", "uvicorn google_ads_server:app --host 0.0.0.0 --port $PORT"]
+  
+```
+
+---
+
+Your Dockerfile has been updated so that Uvicorn will now listen on the port specified by the `$PORT` environment variable, which is required by Render for all endpoints to work reliably.
+
+**Next steps:**
+1. Commit and push this Dockerfile change to your repository.
+2. Wait for Render to redeploy your service.
+3. Test your endpoints (`/list-accounts`, `/keyword-ideas`, etc.) again.
+
+If you encounter any further issues or want to improve the output format (e.g., return JSON), just let me know!
+
+---
+
+_**User**_
+
+Can't push refs to remote. Try running "Pull" first to integrate your changes.
+
+---
+
+_**Assistant**_
+
+```bash
+git pull --rebase
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git pull --rebase
+error: cannot pull with rebase: You have unstaged changes.
+error: please commit or stash them.
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git add Dockerfile && git commit -m "Update Dockerfile to use $PORT for Render compatibility"
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git add Dockerfile && git commit -m "Update Dockerfile to use $PORT for Re
+nder compatibility"                     git add Dockerfile && git commit -m "Update Dockerfile to use $PORT for Re
+nder compatibility"
+On branch main
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .specstory/history/2025-07-15_00-19Z-can-i-deploy-this-project-on-vercel.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git stash
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git stash
+Saved working directory and index state WIP on main: 4bc70a3 Update Dockerfile to use dynamic port for Uvicorn com
+mand
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git pull --rebase
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git pull --rebase
+Current branch main is up to date.
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git stash pop
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git stash pop
+On branch main
+Your branch is ahead of 'origin/main' by 2 commits.
+  (use "git push" to publish your local commits)
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .specstory/history/2025-07-15_00-19Z-can-i-deploy-this-project-on-vercel.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+Dropped refs/stash@{0} (8ec6667b71ae34e458e29898b37802b4a38465ee)
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git push
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git push
+Enumerating objects: 19, done.
+Counting objects: 100% (19/19), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (13/13), done.
+Writing objects: 100% (13/13), 18.68 KiB | 4.67 MiB/s, done.
+Total 13 (delta 8), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (8/8), completed with 5 local objects.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protectio
+n/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Google Cloud Service Account Credentials ——————————
+remote:        locations:
+remote:          - commit: 2ca25132c16e565082be2b29e3eb8894aa7bd3e1
+remote:            path: nomadixgear-parse-emails-4a20c1d08701.json:1
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/jairodriguez/mcp-google-ads/security/secret-scanning/unblock-secret/2ztR0IGOcDrI
+7orU57bsmXw08EV
+remote:     
+remote: 
+remote: 
+To https://github.com/jairodriguez/mcp-google-ads.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/jairodriguez/mcp-google-ads.git'
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+Your push was **blocked by GitHub** because a Google Cloud Service Account credentials file (`nomadixgear-parse-emails-4a20c1d08701.json`) was committed to your repository history. This is a security feature to prevent accidental exposure of secrets.
+
+---
+
+## How to Fix This
+
+1. **Remove the credentials file from your git history.**
+2. **Permanently delete it from all commits (not just the working directory).**
+3. **Force-push the cleaned history (if allowed), or follow GitHub’s unblock instructions.**
+
+---
+
+### **Step-by-Step: Remove Secret from Git History**
+
+#### 1. Remove the file and unstage it
+```bash
+git rm --cached nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+#### 2. Use the BFG Repo-Cleaner or git filter-repo to purge it from history  
+(Recommended for large repos or if the file was committed long ago.)
+
+**With BFG:**
+- Install BFG: https://rtyley.github.io/bfg-repo-cleaner/
+- Run:
+  ```bash
+  bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+  git reflog expire --expire=now --all && git gc --prune=now --aggressive
+  ```
+
+**With git filter-repo (modern, preferred):**
+- Install: `pip install git-filter-repo`
+- Run:
+  ```bash
+  git filter-repo --path nomadixgear-parse-emails-4a20c1d08701.json --invert-paths
+  ```
+
+#### 3. Commit and push again
+```bash
+git add .
+git commit -m "Remove service account key from repo history"
+git push --force
+```
+
+---
+
+### **Important:**
+- **Never commit secrets to your repo.** Use Render’s Secret Files and environment variables instead.
+- After cleaning, **rotate your service account key** in Google Cloud Console, as it may have been exposed.
+
+---
+
+Would you like detailed, step-by-step instructions for your specific situation (BFG or filter-repo)? Or do you want to try the quick fix first?
+
+---
+
+_**User**_
+
+no, I think you erased the file locally, but let's run another curl test
+
+---
+
+_**Assistant**_
+
+Absolutely! Since the Dockerfile is now set up to use the correct port and your service is running, you can run a `curl` test to check your endpoints.
+
+Here’s how to test your `/list-accounts` and `/keyword-ideas` endpoints:
+
+---
+
+### 1. **Test `/list-accounts`**
+```bash
+curl "https://mcp-google-ads-vtmp.onrender.com/list-accounts"
+```
+
+---
+
+### 2. **Test `/keyword-ideas`**  
+(Replace the parameters as needed)
+```bash
+curl "https://mcp-google-ads-vtmp.onrender.com/keyword-ideas?customer_id=9197949842&q=glamping&q=tents&geo=2484&lang=1003&limit=5"
+```
+
+---
+
+**If you get a response:**  
+- Your deployment is working!
+
+**If you get an error or 502:**  
+- Let me know the output or error message, and I’ll help you debug further.
+
+Would you like me to run the `curl` command for a specific endpoint, or do you want to try it yourself and share the result?
+
+---
+
+_**User**_
+
+
+
+---
+
+_**Assistant**_
+
+Your `/keyword-ideas` endpoint is now returning a **Google Ads API error**:
+
+```
+"Invalid JSON payload received. Unknown name \"network\": Cannot find field."
+```
+
+---
+
+## What This Means
+
+- Your FastAPI server is running and calling the Google Ads API.
+- The request payload you’re sending to Google Ads includes a field named `network`, but the API does **not** expect or recognize this field in the request for keyword ideas.
+
+---
+
+## How to Fix
+
+1. **Remove the `network` field** from the payload you send to the Google Ads API in your `/keyword-ideas` endpoint.
+2. Only include fields that are documented and required by the [Google Ads API Keyword Plan Idea Service](https://developers.google.com/google-ads/api/reference/rpc/v16/GenerateKeywordIdeasRequest).
+
+---
+
+### Example: Correct Payload Structure
+
+For `GenerateKeywordIdeasRequest`, the payload should look like:
+```json
+{
+  "customer_id": "9197949842",
+  "language": "1003",
+  "geo_target_constants": ["geoTargetConstants/2484"],
+  "keyword_seed": {
+    "keywords": ["glamping", "tents"]
+  }
+  // ...other valid fields, but NOT "network"
+}
+```
+
+---
+
+## What to Do Next
+
+- **Edit your `google_ads_server.py`** and find where the payload for the Google Ads API is constructed in the `/keyword-ideas` endpoint.
+- **Remove any `"network"` field** from the payload.
+- Save, commit, push, and redeploy.
+
+Would you like me to update the code to remove the `network` field from the payload for you?
+
+---
+
+_**User**_
+
+proceed to Edit your google_ads_server.py and find where the payload for the Google Ads API is constructed in the /keyword-ideas endpoint.
+Remove any "network" field from the payload.
+Save, commit, push, and redeploy.
+
+---
+
+_**Assistant**_
+
+<details>
+            <summary>Searched codebase "Where is the payload for the Google Ads API constructed in the /keyword-ideas endpoint?" • **25** results</summary>
+        
+| File | Lines |
+|------|-------|
+| `google_ads_server.py` | L508-553 |
+| `google_ads_server.py` | L447-508 |
+| `google_ads_server.py` | L303-354 |
+| `google_ads_server.py` | L853-918 |
+| `google_ads_server.py` | L1306-1348 |
+| `google_ads_server.py` | L644-665 |
+| `google_ads_server.py` | L766-822 |
+| `google_ads_server.py` | L201-242 |
+| `google_ads_server.py` | L281-303 |
+| `google_ads_server.py` | L822-853 |
+| `google_ads_server.py` | L553-599 |
+| `google_ads_server.py` | L1144-1206 |
+| `google_ads_server.py` | L960-1006 |
+| `google_ads_server.py` | L400-447 |
+| `google_ads_server.py` | L729-766 |
+| `google_ads_server.py` | L599-604 |
+| `google_ads_server.py` | L354-400 |
+| `google_ads_server.py` | L1348-1387 |
+| `google_ads_server.py` | L604-644 |
+| `google_ads_server.py` | L1421-1452 |
+| `google_ads_server.py` | L1-49 |
+| `google_ads_server.py` | L918-960 |
+| `google_ads_server.py` | L1096-1144 |
+| `google_ads_server.py` | L1267-1306 |
+| `google_ads_server.py` | L1049-1096 |
+
+</details>
+
+---
+
+<details>
+            <summary>Grep search for "network" • **1** files</summary>
+        
+| File | Line | Match |
+|------|------|-------|
+| `file:///Users/bernardojrodriguez/Documents/code/mcp-google-ads/google_ads_server.py` | L1506 | `"network": "GOOGLE_SEARCH_AND_PARTNERS",` |
+
+</details>
+
+---
+
+Read file: google_ads_server.py
+
+---
+
+```diff
+              "keywordSeed": {"keywords": q},
+              "language": f"languageConstants/{lang}",
+-             "geoTargetConstants": [f"geoTargetConstants/{geo}"],
+-             "network": "GOOGLE_SEARCH_AND_PARTNERS",
++             "geoTargetConstants": [f"geoTargetConstants/{geo}"]
+          }
+          if limit:
+```
+
+---
+
+```bash
+git add google_ads_server.py && git commit -m "fix: remove 'network' field from keyword ideas payload for Google Ads API compatibility"
+```
+
+```
+<keyword ideas payload for Google Ads API compatibility"
+[main bf6c0e3] fix: remove 'network' field from keyword ideas payload for Google Ads API compatibility
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git push
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % git push
+Enumerating objects: 22, done.
+Counting objects: 100% (22/22), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (16/16), done.
+Writing objects: 100% (16/16), 18.96 KiB | 9.48 MiB/s, done.
+Total 16 (delta 10), reused 0 (delta 0), pack-reused 0
+remote: Resolving deltas: 100% (10/10), completed with 5 local objects.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protectio
+n/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Google Cloud Service Account Credentials ——————————
+remote:        locations:
+remote:          - commit: 2ca25132c16e565082be2b29e3eb8894aa7bd3e1
+remote:            path: nomadixgear-parse-emails-4a20c1d08701.json:1
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/jairodriguez/mcp-google-ads/security/secret-scanning/unblock-secret/2ztR0IGOcDrI
+7orU57bsmXw08EV
+remote:     
+remote: 
+remote: 
+To https://github.com/jairodriguez/mcp-google-ads.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/jairodriguez/mcp-google-ads.git'
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+The fix to remove the `"network"` field from the `/keyword-ideas` payload has been committed locally, but your push is still being **blocked by GitHub** due to the service account credentials file (`nomadixgear-parse-emails-4a20c1d08701.json`) in your repository history.
+
+**Render will not redeploy until you can push to GitHub.**
+
+---
+
+## What You Need to Do
+
+1. **Remove the credentials file from your git history** (not just from the working directory).
+2. **Rewrite history using BFG or git filter-repo** to purge the secret.
+3. **Force-push the cleaned history** (if allowed by your repo settings).
+
+---
+
+### **Quick Summary of Steps**
+
+1. **Remove the file from git:**
+   ```bash
+   git rm --cached nomadixgear-parse-emails-4a20c1d08701.json
+   git commit -m "Remove service account key from repo"
+   ```
+
+2. **Permanently erase it from all history:**
+   - Install [BFG Repo-Cleaner](https://rtyley.github.io/bfg-repo-cleaner/) or `git-filter-repo`.
+   - Run (with BFG):
+     ```bash
+     bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+     git reflog expire --expire=now --all && git gc --prune=now --aggressive
+     ```
+   - Or (with git-filter-repo):
+     ```bash
+     pip install git-filter-repo
+     git filter-repo --path nomadixgear-parse-emails-4a20c1d08701.json --invert-paths
+     ```
+
+3. **Force-push:**
+   ```bash
+   git push --force
+   ```
+
+---
+
+**After this, you’ll be able to push your code and Render will redeploy with the fix.**
+
+If you want, I can walk you through these steps in detail, or you can follow the [GitHub guide for removing sensitive data](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository).  
+Let me know how you’d like to proceed!
+
+---
+
+_**User**_
+
+I just added the file to gitignore
+
+---
+
+_**Assistant**_
+
+Adding the credentials file to `.gitignore` is a good step for **future** commits, but it does **not** remove the file from your repository’s history or from previous commits. That’s why GitHub is still blocking your push.
+
+**The file is still present in your git history, which is what triggers GitHub’s secret scanning and push protection.**
+
+---
+
+## What You Still Need To Do
+
+1. **Remove the file from git history** (not just from the working directory or future commits).
+2. **Rewrite your repository history** to erase all traces of the file.
+3. **Force-push the cleaned history** to GitHub.
+
+---
+
+### Why `.gitignore` Alone Is Not Enough
+
+- `.gitignore` prevents new files from being added to git in the future.
+- It does **not** affect files that have already been committed and pushed.
+- GitHub’s push protection scans **all commits** for secrets, not just the latest one.
+
+---
+
+## Next Steps
+
+Would you like to:
+- Get a step-by-step guide to remove the file from your git history using BFG or `git filter-repo`?
+- Or do you want to try following the [official GitHub guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository) yourself?
+
+**Let me know and I’ll walk you through the safest and fastest way to fix this!**
+
+---
+
+_**User**_
+
+again
+
+---
+
+_**Assistant**_
+
+You are still seeing the error:
+
+```
+"Invalid JSON payload received. Unknown name \"network\": Cannot find field."
+```
+
+This means the `"network"` field is **still present in the payload** being sent to the Google Ads API by your `/keyword-ideas` endpoint on Render.
+
+---
+
+## Why Is This Happening?
+
+- The fix to remove `"network"` from your code is **only local**—it has not been deployed to Render.
+- **Your push to GitHub is blocked** by secret scanning, so Render cannot redeploy with the fix.
+
+---
+
+## What You Must Do to Fix This
+
+1. **Remove the credentials file from your git history** (not just from the working directory or `.gitignore`).
+2. **Rewrite your git history** using BFG or `git filter-repo` to erase all traces of the file.
+3. **Force-push** the cleaned history to GitHub.
+4. **Render will then redeploy** with the fix, and the `"network"` field will be gone.
+
+---
+
+### **You cannot fix this by editing code or `.gitignore` alone.**
+**You must clean your git history and force-push.**
+
+---
+
+Would you like a step-by-step guide for using BFG or `git filter-repo` to remove the secret and unblock your push?  
+Or do you want to follow the [official GitHub guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository) yourself?
+
+**Let me know and I’ll walk you through it!**
+
+---
+
+_**User**_
+
+go ahead and Remove the credentials file from your git history (not just from the working directory or .gitignore).
+Rewrite your git history using BFG or git filter-repo to erase all traces of the file.
+Force-push the cleaned history to GitHub.
+Render will then redeploy with the fix, and the "network" field will be gone.
+
+---
+
+_**Assistant**_
+
+```bash
+pip install git-filter-repo
+```
+
+```
+bernardojrodriguez@Mac mcp-google-ads % pip install git-filter-repo
+zsh: command not found: pip
+bernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
