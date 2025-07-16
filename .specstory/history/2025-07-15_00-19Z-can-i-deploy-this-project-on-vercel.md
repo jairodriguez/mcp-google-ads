@@ -4231,3 +4231,170 @@ Would you like me to proceed with these steps automatically?
 
 ---
 
+_**User**_
+
+proceed
+
+---
+
+_**Assistant**_
+
+```bash
+git rm --cached nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % git rm --cached nomadixgear-parse-emails-4a20c1d08701.json
+fatal: pathspec 'nomadixgear-parse-emails-4a20c1d08701.json' did not match any files
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git commit --allow-empty -m "Remove credentials file from latest commit (empty commit if already gone)"
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % git commit --allow-empty -m "Remove credentials file from latest comm
+it (empty commit if already gone)"           git commit --allow-empty -m "Remove credentials file from latest comm
+it (empty commit if already gone)"
+[main fe0aede] Remove credentials file from latest commit (empty commit if already gone)
+ 1 file changed, 13 deletions(-)
+ delete mode 100644 nomadixgear-parse-emails-4a20c1d08701.json
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+
+Using repo : /Users/bernardojrodriguez/Documents/code/mcp-google-ads/.git
+
+Found 26 objects to protect
+Found 5 commit-pointing refs : HEAD, refs/heads/main, refs/remotes/origin/main, ...
+
+Protected commits
+-----------------
+
+These are your protected commits, and so their contents will NOT be altered:
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.cache.Striped64 (file:/opt/homebr
+ew/Cellar/bfg/1.15.0/libexec/bfg-1.15.0.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.cache.Striped64
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+ * commit fe0aedea (protected by 'HEAD')
+
+Cleaning
+--------
+
+Found 29 commits
+Cleaning commits:       100% (29/29)
+Cleaning commits completed in 43 ms.
+
+Updating 1 Ref
+--------------
+
+        Ref               Before     After   
+        -------------------------------------
+        refs/heads/main | fe0aedea | bbb77631
+
+Updating references:    100% (1/1)
+...Ref update completed in 2 ms.
+
+Commit Tree-Dirt History
+------------------------
+
+        Earliest               Latest
+        |                           |
+        ...........................Dm
+
+        D = dirty commits (file tree fixed)
+        m = modified commits (commit message or parents changed)
+        . = clean commits (no changes to file tree)
+
+                                Before     After   
+        -------------------------------------------
+        First modified commit | 7e8c8cda | 97e761a5
+        Last dirty commit     | 7e8c8cda | 97e761a5
+
+Deleted files
+-------------
+
+        Filename                                     Git id           
+        --------------------------------------------------------------
+        nomadixgear-parse-emails-4a20c1d08701.json | f4d66219 (2.3 KB)
+
+
+In total, 3 object ids were changed. Full details are logged here:
+
+        /Users/bernardojrodriguez/Documents/code/mcp-google-ads.bfg-report/2025-07-15/20-49-40
+
+BFG run is complete! When ready, run: git reflog expire --expire=now --all && git gc --prune=now --aggressive
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % git reflog expire --expire=now --all && git gc --prune=now --aggressi
+ve                                           git reflog expire --expire=now --all && git gc --prune=now --aggressi
+ve
+Enumerating objects: 146, done.
+Counting objects: 100% (146/146), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (140/140), done.
+Writing objects: 100% (146/146), done.
+Total 146 (delta 73), reused 70 (delta 0), pack-reused 0
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git push --force
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % git push --force
+Enumerating objects: 30, done.
+Counting objects: 100% (30/30), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (14/14), done.
+Writing objects: 100% (23/23), 22.60 KiB | 11.30 MiB/s, done.
+Total 23 (delta 15), reused 17 (delta 9), pack-reused 0
+remote: Resolving deltas: 100% (15/15), completed with 6 local objects.
+To https://github.com/jairodriguez/mcp-google-ads.git
+   148d304..bbb7763  main -> main
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+Your git history has now been fully cleaned, and the force-push to GitHub was successful! 🎉
+
+- The credentials file is gone from all commits and history.
+- GitHub accepted the push, so Render will now redeploy your service with the latest code (including the fix for the `"network"` field in `/keyword-ideas`).
+
+---
+
+**Next steps:**
+1. Wait for Render to finish redeploying (watch the dashboard for build logs).
+2. Test your endpoints again:
+   - `/list-accounts`
+   - `/keyword-ideas`
+
+If you encounter any new errors or need further help, let me know!
+
+---
+
