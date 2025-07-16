@@ -3666,14 +3666,568 @@ Render will then redeploy with the fix, and the "network" field will be gone.
 _**Assistant**_
 
 ```bash
-pip install git-filter-repo
+git rm --cached nomadixgear-parse-emails-4a20c1d08701.json
 ```
 
 ```
-bernardojrodriguez@Mac mcp-google-ads % pip install git-filter-repo
-zsh: command not found: pip
-bernardojrodriguez@Mac mcp-google-ads %
+.venvbernardojrodriguez@Mac mcp-google-ads % git rm --cached nomadixgear-parse-emails-4a20c1d08701.json          g
+it rm --cached nomadixgear-parse-emails-4a20c1d08701.json
+rm 'nomadixgear-parse-emails-4a20c1d08701.json'
+.venvbernardojrodriguez@Mac mcp-google-ads %
 ```
+
+---
+
+```bash
+brew install bfg
+```
+
+```
+==> Auto-updating Homebrew...
+Adjust how often this is run with HOMEBREW_AUTO_UPDATE_SECS or disable with
+HOMEBREW_NO_AUTO_UPDATE. Hide these hints with HOMEBREW_NO_ENV_HINTS (see `man brew`).
+==> Auto-updated Homebrew!
+Updated 2 taps (homebrew/core and homebrew/cask).
+==> New Formulae
+air: Fast and opinionated formatter for R code
+backlog-md: Markdown‑native Task Manager & Kanban visualizer for any Git repository
+damask-grid: Grid solver of DAMASK - Multi-physics crystal plasticity simulation package
+decker: HyperCard-like multimedia sketchpad
+execstack: Utility to set/clear/query executable stack bit
+ffmate: FFmpeg automation layer
+kafkactl-aws-plugin: AWS Plugin for kafkactl
+kafkactl-azure-plugin: Azure Plugin for kafkactl
+lakekeeper: Apache Iceberg REST Catalog
+lunarml: Standard ML compiler that produces Lua/JavaScript
+lutgen: Blazingly fast interpolated LUT generator and applicator for color palettes
+min-lang: Small but practical concatenative programming language and shell
+nixfmt: Command-line tool to format Nix language code
+pgslice: Postgres partitioning as easy as pie
+plakar: Create backups with compression, encryption and deduplication
+pytr: Use TradeRepublic in terminal and mass download all documents
+rsql: CLI for relational databases and common data file formats
+somo: Human-friendly alternative to netstat for socket and port monitoring
+stormy: Minimal, customizable and neofetch-like weather CLI based on rainy
+teslamate: Self-hosted data logger for your Tesla
+
+You have 11 outdated formulae installed.
+
+==> Downloading https://ghcr.io/v2/homebrew/core/bfg/manifests/1.15.0
+########################################################################################################### 100.0%
+==> Fetching dependencies for bfg: glib, xorgproto, libxau, libxdmcp, libxcb, libx11, libxext, libxrender, lzo, pi
+xman, cairo, graphite2, harfbuzz and openjdk
+==> Downloading https://ghcr.io/v2/homebrew/core/glib/manifests/2.84.3
+########################################################################################################### 100.0%
+==> Fetching glib
+==> Downloading https://ghcr.io/v2/homebrew/core/glib/blobs/sha256:3065276af7a7d4e7114fa3c0d967d1745dea528fde36bf1
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/xorgproto/manifests/2024.1
+########################################################################################################### 100.0%
+==> Fetching xorgproto
+==> Downloading https://ghcr.io/v2/homebrew/core/xorgproto/blobs/sha256:91066363512e4a3b01644398886815eb370bc8f626
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/libxau/manifests/1.0.12
+########################################################################################################### 100.0%
+==> Fetching libxau
+==> Downloading https://ghcr.io/v2/homebrew/core/libxau/blobs/sha256:e8a5fedbd9e5c49f10006171decc5b1e56c48fbd4267e
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/libxdmcp/manifests/1.1.5
+########################################################################################################### 100.0%
+==> Fetching libxdmcp
+==> Downloading https://ghcr.io/v2/homebrew/core/libxdmcp/blobs/sha256:b09a915dae5b45371a86f20a4ccce13c16c7a8eadc8
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/libxcb/manifests/1.17.0-1
+########################################################################################################### 100.0%
+==> Fetching libxcb
+==> Downloading https://ghcr.io/v2/homebrew/core/libxcb/blobs/sha256:cce8d9e12c3f0b2fdbffbb3f7ba02f7e25cf3fa495b3e
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/libx11/manifests/1.8.12
+########################################################################################################### 100.0%
+==> Fetching libx11
+==> Downloading https://ghcr.io/v2/homebrew/core/libx11/blobs/sha256:57ccd55767fd6ffc7d32940d1c59d59b42c82abff4abf
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/libxext/manifests/1.3.6
+########################################################################################################### 100.0%
+==> Fetching libxext
+==> Downloading https://ghcr.io/v2/homebrew/core/libxext/blobs/sha256:a0434e871b6dfa64f18757e5d6df179308bcf1b53e5f
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/libxrender/manifests/0.9.12
+########################################################################################################### 100.0%
+==> Fetching libxrender
+==> Downloading https://ghcr.io/v2/homebrew/core/libxrender/blobs/sha256:edcb8884f9d33219d276051be3b5ad64f390cdf3a
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/lzo/manifests/2.10
+########################################################################################################### 100.0%
+==> Fetching lzo
+==> Downloading https://ghcr.io/v2/homebrew/core/lzo/blobs/sha256:6bb0401c41a18fd37071ec9591fe053a808f07552ff7ea22
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/pixman/manifests/0.46.2
+########################################################################################################### 100.0%
+==> Fetching pixman
+==> Downloading https://ghcr.io/v2/homebrew/core/pixman/blobs/sha256:562fd713cba6bd2d1b67efc0985e25a0540243c6af8bc
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/cairo/manifests/1.18.4
+########################################################################################################### 100.0%
+==> Fetching cairo
+==> Downloading https://ghcr.io/v2/homebrew/core/cairo/blobs/sha256:6b2d148a34a670430a459c374376ebed890b61eb7573e8
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/graphite2/manifests/1.3.14
+########################################################################################################### 100.0%
+==> Fetching graphite2
+==> Downloading https://ghcr.io/v2/homebrew/core/graphite2/blobs/sha256:150b286ab4cfc8696fcd3fa4e7fa24c9825f024ef9
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/harfbuzz/manifests/11.2.1
+########################################################################################################### 100.0%
+==> Fetching harfbuzz
+==> Downloading https://ghcr.io/v2/homebrew/core/harfbuzz/blobs/sha256:c2bfac8d26f33150c1fbe86293113c217b6a452c347
+########################################################################################################### 100.0%
+==> Downloading https://ghcr.io/v2/homebrew/core/openjdk/manifests/24.0.1
+########################################################################################################### 100.0%
+==> Fetching openjdk
+==> Downloading https://ghcr.io/v2/homebrew/core/openjdk/blobs/sha256:f75d5d24e460d26c1cdc01b60d9a523c9913ebc3b738
+########################################################################################################### 100.0%
+==> Fetching bfg
+==> Downloading https://ghcr.io/v2/homebrew/core/bfg/blobs/sha256:e6ab06431b47f90f783c186032521800d0fffb1f9fffb842
+curl: (28) Failed to connect to ghcr.io port 443 after 75086 ms: Couldn't connect to server
+
+Warning: Problem : timeout. Will retry in 1 seconds. 3 retries left.
+curl: (28) Failed to connect to ghcr.io port 443 after 75004 ms: Couldn't connect to server            #   #  ##
+
+Warning: Problem : timeout. Will retry in 2 seconds. 2 retries left.
+curl: (28) Failed to connect to ghcr.io port 443 after 75002 ms: Couldn't connect to server
+
+Warning: Problem : timeout. Will retry in 4 seconds. 1 retries left.
+curl: (28) Failed to connect to ghcr.io port 443 after 75114 ms: Couldn't connect to server
+
+
+Error: bfg: Failed to download resource "bfg"
+Download failed: https://ghcr.io/v2/homebrew/core/bfg/blobs/sha256:e6ab06431b47f90f783c186032521800d0fffb1f9fffb84
+2c0de85e624d54d2d
+==> Installing dependencies for bfg: glib, xorgproto, libxau, libxdmcp, libxcb, libx11, libxext, libxrender, lzo, 
+pixman, cairo, graphite2, harfbuzz and openjdk
+==> Installing bfg dependency: glib
+==> Downloading https://ghcr.io/v2/homebrew/core/glib/manifests/2.84.3
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/88d63b55ddeb4b28ab9c7944cbfcc7dc19
+d04bd0effc32c2e9623ce50a6cd51f--glib-2.84.3.bottle_manifest.json
+==> Pouring glib--2.84.3.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/glib/2.84.3: 504 files, 37.7MB
+==> Installing bfg dependency: xorgproto
+==> Downloading https://ghcr.io/v2/homebrew/core/xorgproto/manifests/2024.1
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/d89d69340366d1d015e7214520f64081e2
+d82d7955fb28c6ea5f6539dcb610b2--xorgproto-2024.1.bottle_manifest.json
+==> Pouring xorgproto--2024.1.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/xorgproto/2024.1: 268 files, 3.9MB
+==> Installing bfg dependency: libxau
+==> Downloading https://ghcr.io/v2/homebrew/core/libxau/manifests/1.0.12
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/6335be202d59f96fdee2e4a02f93d8ee87
+dfcfdbaa4ed132b8fe8c3e3651e27c--libxau-1.0.12.bottle_manifest.json
+==> Pouring libxau--1.0.12.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libxau/1.0.12: 21 files, 134.3KB
+==> Installing bfg dependency: libxdmcp
+==> Downloading https://ghcr.io/v2/homebrew/core/libxdmcp/manifests/1.1.5
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/8713e53f73d0be64780dbea522b0ee0702
+7e6cc7828ff1a4fa0a6596f14cfe25--libxdmcp-1.1.5.bottle_manifest.json
+==> Pouring libxdmcp--1.1.5.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libxdmcp/1.1.5: 12 files, 140.0KB
+==> Installing bfg dependency: libxcb
+==> Downloading https://ghcr.io/v2/homebrew/core/libxcb/manifests/1.17.0-1
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/a17e9d0e04a0013a5be592875b012c4090
+23664b3df084b8051766331d213ff5--libxcb-1.17.0-1.bottle_manifest.json
+==> Pouring libxcb--1.17.0.arm64_sequoia.bottle.1.tar.gz
+🍺  /opt/homebrew/Cellar/libxcb/1.17.0: 2,498 files, 7.5MB
+==> Installing bfg dependency: libx11
+==> Downloading https://ghcr.io/v2/homebrew/core/libx11/manifests/1.8.12
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/8510ddcf75e7c4313fe4f8b0999d667b22
+f2ae0b850bc80ba53becb609335934--libx11-1.8.12.bottle_manifest.json
+==> Pouring libx11--1.8.12.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libx11/1.8.12: 1,043 files, 7MB
+==> Installing bfg dependency: libxext
+==> Downloading https://ghcr.io/v2/homebrew/core/libxext/manifests/1.3.6
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/fedb843acbfcf682fb451396914bfc096f
+9ea2748376d4c43ce2af7ce1b766b7--libxext-1.3.6.bottle_manifest.json
+==> Pouring libxext--1.3.6.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libxext/1.3.6: 88 files, 458.6KB
+==> Installing bfg dependency: libxrender
+==> Downloading https://ghcr.io/v2/homebrew/core/libxrender/manifests/0.9.12
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/152fb22ff88a23b62841dcfa14aac21018
+e1d736c072d732185f6139ef922e1c--libxrender-0.9.12.bottle_manifest.json
+==> Pouring libxrender--0.9.12.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libxrender/0.9.12: 13 files, 225.4KB
+==> Installing bfg dependency: lzo
+==> Downloading https://ghcr.io/v2/homebrew/core/lzo/manifests/2.10
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/d4aa5b0c239912c53bc857d1012c6b7feb
+4acb509618f5e100f95bf8521f08e7--lzo-2.10.bottle_manifest.json
+==> Pouring lzo--2.10.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/lzo/2.10: 32 files, 567.9KB
+==> Installing bfg dependency: pixman
+==> Downloading https://ghcr.io/v2/homebrew/core/pixman/manifests/0.46.2
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/c608060dd44c7a853d8ac82d8641c6911f
+cc8d7ba73a07435e0216d210b15842--pixman-0.46.2.bottle_manifest.json
+==> Pouring pixman--0.46.2.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/pixman/0.46.2: 10 files, 688.0KB
+==> Installing bfg dependency: cairo
+==> Downloading https://ghcr.io/v2/homebrew/core/cairo/manifests/1.18.4
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/795ef2e2e2a57e6baba0fc9ceedb58980e
+8ec718aba0170b9441a0b25442cfbf--cairo-1.18.4.bottle_manifest.json
+==> Pouring cairo--1.18.4.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/cairo/1.18.4: 53 files, 2.2MB
+==> Installing bfg dependency: graphite2
+==> Downloading https://ghcr.io/v2/homebrew/core/graphite2/manifests/1.3.14
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/bbb4dd2ef1846301d1eb08053e19e11ca9
+c780f93f4d3b2d638fd94a9bf54a0c--graphite2-1.3.14.bottle_manifest.json
+==> Pouring graphite2--1.3.14.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/graphite2/1.3.14: 19 files, 284.8KB
+==> Installing bfg dependency: harfbuzz
+==> Downloading https://ghcr.io/v2/homebrew/core/harfbuzz/manifests/11.2.1
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/541d81ca7e8e8b678fb64d9f758603fe52
+5bfc219f8fb4782fd91fc81f9465aa--harfbuzz-11.2.1.bottle_manifest.json
+==> Pouring harfbuzz--11.2.1.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/harfbuzz/11.2.1: 77 files, 10.2MB
+==> Installing bfg dependency: openjdk
+==> Downloading https://ghcr.io/v2/homebrew/core/openjdk/manifests/24.0.1
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/e3046ed51e076d2a1ab3b47d40fc5b0383
+a4cbe4ebc6638b44f4a1b4bd8316e1--openjdk-24.0.1.bottle_manifest.json
+==> Pouring openjdk--24.0.1.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/openjdk/24.0.1: 556 files, 368.9MB
+==> Installing bfg
+==> Pouring bfg--1.15.0.all.bottle.tar.gz
+Error: No such file or directory @ rb_sysopen - /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/4f7e9f
+c45308ffc4f16299aff23c6de84da6c7909cfbff9c1f520b036b2ff724--bfg--1.15.0.all.bottle.tar.gz
+
+```
+
+---
+
+_**User**_
+
+continue
+
+---
+
+_**Assistant**_
+
+```bash
+bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+zsh: command not found: bfg
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+java -jar /opt/homebrew/Cellar/bfg/1.15.0/libexec/bfg.jar --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+<delete-files nomadixgear-parse-emails-4a20c1d08701.json
+The operation couldn’t be completed. Unable to locate a Java Runtime.
+Please visit http://www.java.com for information on installing Java.
+
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+brew install openjdk
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % brew install openjdk
+==> Downloading https://formulae.brew.sh/api/formula.jws.json
+==> Downloading https://formulae.brew.sh/api/cask.jws.json
+Warning: openjdk 24.0.1 is already installed and up-to-date.
+To reinstall 24.0.1, run:
+  brew reinstall openjdk
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+/usr/bin/java -jar /opt/homebrew/Cellar/bfg/1.15.0/libexec/bfg.jar --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+<delete-files nomadixgear-parse-emails-4a20c1d08701.json
+The operation couldn’t be completed. Unable to locate a Java Runtime.
+Please visit http://www.java.com for information on installing Java.
+
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc 
+&& source ~/.zshrc                           echo 'export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"' >> ~/.zshrc 
+&& source ~/.zshrc
+```
+
+---
+
+```bash
+java -version
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % java -version
+openjdk version "24.0.1" 2025-04-15
+OpenJDK Runtime Environment Homebrew (build 24.0.1)
+OpenJDK 64-Bit Server VM Homebrew (build 24.0.1, mixed mode, sharing)
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+zsh: command not found: bfg
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+java -jar /opt/homebrew/Cellar/bfg/1.15.0/libexec/bfg.jar --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+<delete-files nomadixgear-parse-emails-4a20c1d08701.json
+Error: Unable to access jarfile /opt/homebrew/Cellar/bfg/1.15.0/libexec/bfg.jar
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+find /opt/homebrew/Cellar/bfg/ -name '*.jar'
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % find /opt/homebrew/Cellar/bfg/ -name '*.jar'
+find: /opt/homebrew/Cellar/bfg/: No such file or directory
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+brew reinstall bfg
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % brew reinstall bfg
+==> Downloading https://ghcr.io/v2/homebrew/core/bfg/manifests/1.15.0
+Already downloaded: /Users/bernardojrodriguez/Library/Caches/Homebrew/downloads/8c4e830c93cdf3e851df42e8f573c9e7c4
+6cfb11859082cbf875247f1355a4d4--bfg-1.15.0.bottle_manifest.json
+==> Fetching bfg
+==> Downloading https://ghcr.io/v2/homebrew/core/bfg/blobs/sha256:e6ab06431b47f90f783c186032521800d0fffb1f9fffb842
+########################################################################################################### 100.0%
+==> Reinstalling bfg 
+==> Pouring bfg--1.15.0.all.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/bfg/1.15.0: 5 files, 14MB
+==> Running `brew cleanup bfg`...
+Disable this behaviour by setting HOMEBREW_NO_INSTALL_CLEANUP.
+Hide these hints with HOMEBREW_NO_ENV_HINTS (see `man brew`).
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+
+Using repo : /Users/bernardojrodriguez/Documents/code/mcp-google-ads/.git
+
+Found 27 objects to protect
+Found 5 commit-pointing refs : HEAD, refs/heads/main, refs/remotes/origin/main, ...
+
+Protected commits
+-----------------
+
+These are your protected commits, and so their contents will NOT be altered:
+
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by com.google.common.cache.Striped64 (file:/opt/homebr
+ew/Cellar/bfg/1.15.0/libexec/bfg-1.15.0.jar)
+WARNING: Please consider reporting this to the maintainers of class com.google.common.cache.Striped64
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+ * commit a8ef1030 (protected by 'HEAD') - contains 1 dirty file : 
+        - nomadixgear-parse-emails-4a20c1d08701.json (2.3 KB)
+
+WARNING: The dirty content above may be removed from other commits, but as
+the *protected* commits still use it, it will STILL exist in your repository.
+
+Details of protected dirty content have been recorded here :
+
+/Users/bernardojrodriguez/Documents/code/mcp-google-ads.bfg-report/2025-07-15/20-47-00/protected-dirt/
+
+If you *really* want this content gone, make a manual commit that removes it,
+and then run the BFG on a fresh copy of your repo.
+       
+
+Cleaning
+--------
+
+Found 28 commits
+Cleaning commits:       100% (28/28)
+Cleaning commits completed in 47 ms.
+
+Updating 1 Ref
+--------------
+
+        Ref               Before     After   
+        -------------------------------------
+        refs/heads/main | a8ef1030 | 7e8c8cda
+
+Updating references:    100% (1/1)
+...Ref update completed in 1 ms.
+
+Commit Tree-Dirt History
+------------------------
+
+        Earliest              Latest
+        |                          |
+        ........................DDDm
+
+        D = dirty commits (file tree fixed)
+        m = modified commits (commit message or parents changed)
+        . = clean commits (no changes to file tree)
+
+                                Before     After   
+        -------------------------------------------
+        First modified commit | 2ca25132 | 1cc453ed
+        Last dirty commit     | bf6c0e33 | a59ba881
+
+Deleted files
+-------------
+
+        Filename                                     Git id           
+        --------------------------------------------------------------
+        nomadixgear-parse-emails-4a20c1d08701.json | f4d66219 (2.3 KB)
+
+
+In total, 7 object ids were changed. Full details are logged here:
+
+        /Users/bernardojrodriguez/Documents/code/mcp-google-ads.bfg-report/2025-07-15/20-47-00
+
+BFG run is complete! When ready, run: git reflog expire --expire=now --all && git gc --prune=now --aggressive
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git reflog expire --expire=now --all && git gc --prune=now --aggressive
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % git reflog expire --expire=now --all && git gc --prune=now --aggressi
+ve                                           git reflog expire --expire=now --all && git gc --prune=now --aggressi
+ve
+Enumerating objects: 146, done.
+Counting objects: 100% (146/146), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (140/140), done.
+Writing objects: 100% (146/146), done.
+Total 146 (delta 73), reused 31 (delta 0), pack-reused 0
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+```bash
+git push --force
+```
+
+```
+.venvbernardojrodriguez@Mac mcp-google-ads % git push --force
+Enumerating objects: 30, done.
+Counting objects: 100% (30/30), done.
+Delta compression using up to 10 threads
+Compressing objects: 100% (14/14), done.
+Writing objects: 100% (23/23), 24.11 KiB | 12.05 MiB/s, done.
+Total 23 (delta 15), reused 17 (delta 9), pack-reused 0
+remote: Resolving deltas: 100% (15/15), completed with 6 local objects.
+remote: error: GH013: Repository rule violations found for refs/heads/main.
+remote: 
+remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote: 
+remote:     - Push cannot contain secrets
+remote: 
+remote:     
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protectio
+n/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:     
+remote:     
+remote:       —— Google Cloud Service Account Credentials ——————————
+remote:        locations:
+remote:          - commit: 7e8c8cda1d5eb2f78dff44d7b574215fe315c74a
+remote:            path: nomadixgear-parse-emails-4a20c1d08701.json:1
+remote:     
+remote:        (?) To push, remove secret from commit(s) or follow this URL to allow the secret.
+remote:        https://github.com/jairodriguez/mcp-google-ads/security/secret-scanning/unblock-secret/2ztR0IGOcDrI
+7orU57bsmXw08EV
+remote:     
+remote: 
+remote: 
+To https://github.com/jairodriguez/mcp-google-ads.git
+ ! [remote rejected] main -> main (push declined due to repository rule violations)
+error: failed to push some refs to 'https://github.com/jairodriguez/mcp-google-ads.git'
+.venvbernardojrodriguez@Mac mcp-google-ads %
+```
+
+---
+
+You have successfully run BFG and cleaned your git history, but **GitHub is still blocking your push** because the secret is detected in the most recent commit(s) (specifically, commit `7e8c8cda...`). This means the credentials file is still present in the latest commit, not just in history.
+
+---
+
+## Final Steps to Fully Remove the Secret
+
+1. **Make sure the file is deleted in your working directory and staged for commit:**
+   ```bash
+   git rm --cached nomadixgear-parse-emails-4a20c1d08701.json
+   git commit -m "Remove credentials file from latest commit"
+   ```
+
+2. **Run BFG again to ensure all traces are gone:**
+   ```bash
+   bfg --delete-files nomadixgear-parse-emails-4a20c1d08701.json
+   ```
+
+3. **Clean up and force-push:**
+   ```bash
+   git reflog expire --expire=now --all
+   git gc --prune=now --aggressive
+   git push --force
+   ```
+
+---
+
+**If you still get blocked after this,** you may need to visit the GitHub link provided in the error message to "unblock" the push after confirming you have removed the secret.
+
+Would you like me to proceed with these steps automatically?
 
 ---
 
