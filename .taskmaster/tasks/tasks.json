@@ -1,0 +1,470 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Fix Campaign Creation API Endpoint",
+        "description": "Debug and fix the POST /create-campaign endpoint to ensure it properly creates Google Ads campaigns with budget and targeting parameters, while protecting the working keyword ideas endpoint and accounting for Render deployment timing.",
+        "status": "pending",
+        "dependencies": [],
+        "priority": "high",
+        "details": "1. Review current implementation of the campaign creation endpoint\n2. Identify issues with the Google Ads API v19 integration\n3. Fix payload structure according to Google Ads API v19 documentation\n4. Implement proper error handling with specific error codes and messages\n5. Update the endpoint to use the GoogleAdsService.mutate method with the correct CampaignOperation structure\n6. Ensure proper validation of input parameters (customer_id, campaign_name, budget_amount, geo_targets, status)\n7. Use the latest google-ads Python library (version 22.0.0 or newer)\n8. Implement proper logging for debugging and monitoring\n9. Add safeguards to ensure the working /keyword-ideas endpoint is not affected\n10. Account for Render deployment timing (2-5 minutes) in the implementation strategy\n11. Example implementation:\n```python\nfrom google.ads.googleads.client import GoogleAdsClient\nfrom google.ads.googleads.errors import GoogleAdsException\n\n@app.post('/create-campaign')\nasync def create_campaign(request: CampaignRequest):\n    try:\n        client = GoogleAdsClient.load_from_storage('./google-ads.yaml')\n        campaign_service = client.get_service('CampaignService')\n        campaign_budget_service = client.get_service('CampaignBudgetService')\n        \n        # Create campaign budget\n        campaign_budget_operation = client.get_type('CampaignBudgetOperation')\n        campaign_budget = campaign_budget_operation.create\n        campaign_budget.name = f\"{request.campaign_name} Budget\"\n        campaign_budget.amount_micros = request.budget_amount * 1000000\n        campaign_budget.delivery_method = client.enums.BudgetDeliveryMethodEnum.STANDARD\n        \n        # Add campaign budget\n        campaign_budget_response = campaign_budget_service.mutate_campaign_budgets(\n            customer_id=request.customer_id,\n            operations=[campaign_budget_operation]\n        )\n        \n        # Create campaign\n        campaign_operation = client.get_type('CampaignOperation')\n        campaign = campaign_operation.create\n        campaign.name = request.campaign_name\n        campaign.status = client.enums.CampaignStatusEnum[request.status]\n        campaign.campaign_budget = campaign_budget_response.results[0].resource_name\n        campaign.advertising_channel_type = client.enums.AdvertisingChannelTypeEnum.SEARCH\n        \n        # Add geo targeting\n        for geo_target in request.geo_targets:\n            campaign_criterion_operation = client.get_type('CampaignCriterionOperation')\n            campaign_criterion = campaign_criterion_operation.create\n            campaign_criterion.location.geo_target_constant = client.get_service('GeoTargetConstantService').geo_target_constant_path(geo_target)\n            # Add geo targeting operations\n        \n        # Execute campaign creation\n        campaign_response = campaign_service.mutate_campaigns(\n            customer_id=request.customer_id,\n            operations=[campaign_operation]\n        )\n        \n        return {\n            \"campaign_id\": campaign_response.results[0].resource_name,\n            \"status\": \"success\"\n        }\n    except GoogleAdsException as ex:\n        return {\n            \"status\": \"error\",\n            \"error\": ex.failure.errors[0].message,\n            \"error_code\": ex.failure.errors[0].error_code.request_error\n        }\n```",
+        "testStrategy": "1. Unit test the endpoint with mock Google Ads API responses\n2. Integration test with a test Google Ads account\n3. Test various error scenarios (invalid customer_id, insufficient permissions, invalid budget amount)\n4. Test with different campaign types and settings\n5. Verify campaign creation in the Google Ads UI\n6. Test response format and error handling\n7. Measure response time to ensure it's under 5 seconds\n8. Verify that the /keyword-ideas endpoint continues to function correctly after changes\n9. Test deployment process and verify functionality during the 2-5 minute Render deployment window",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review and analyze current implementation",
+            "description": "Thoroughly examine the existing code for the campaign creation endpoint to identify issues with the Google Ads API v19 integration.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Analyze the current implementation of the POST /create-campaign endpoint, focusing on the Google Ads API v19 integration. Document all issues found, including incorrect method calls, payload structure problems, and missing validation. Compare the implementation against the latest Google Ads API documentation to identify discrepancies.",
+            "testStrategy": "Create a checklist of issues found and verify against Google Ads API v19 documentation. Document all API method calls that need to be updated."
+          },
+          {
+            "id": 2,
+            "title": "Fix payload structure and API integration",
+            "description": "Update the endpoint to use the correct GoogleAdsService.mutate method with proper CampaignOperation structure according to Google Ads API v19 documentation.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Modify the code to use the correct payload structure as specified in the Google Ads API v19 documentation. Update the endpoint to use the GoogleAdsService.mutate method with the correct CampaignOperation structure. Ensure the latest google-ads Python library (version 22.0.0 or newer) is being used. Fix the campaign budget creation process and properly link it to the campaign.",
+            "testStrategy": "Test with mock responses to verify correct API calls are being made. Validate payload structure against API documentation examples."
+          },
+          {
+            "id": 3,
+            "title": "Implement geo targeting functionality",
+            "description": "Fix the geo targeting implementation to properly add location targeting criteria to campaigns.",
+            "status": "done",
+            "dependencies": [],
+            "details": "Complete the implementation of the geo targeting functionality that appears to be incomplete in the current code. Ensure that campaign criterion operations are properly created for each geo target and that they are correctly submitted to the API. Implement proper validation for geo target IDs and handle potential errors when invalid geo targets are provided.",
+            "testStrategy": "Test with various geo target combinations. Verify that location targeting is correctly applied to campaigns in the Google Ads interface after creation."
+          },
+          {
+            "id": 4,
+            "title": "Enhance input validation and error handling",
+            "description": "Implement comprehensive validation for all input parameters and improve error handling with specific error codes and messages.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Add thorough validation for all input parameters (customer_id, campaign_name, budget_amount, geo_targets, status). Implement proper error handling that catches and processes Google Ads API exceptions, as well as validation errors. Return specific error codes and descriptive messages to help clients understand and fix issues. Ensure all error scenarios are properly logged for debugging purposes.",
+            "testStrategy": "Test with invalid inputs (negative budget, invalid customer IDs, missing required fields, etc.). Verify appropriate error messages are returned. Test with various Google Ads API exception scenarios."
+          },
+          {
+            "id": 5,
+            "title": "Implement logging and finalize testing",
+            "description": "Add comprehensive logging for debugging and monitoring, and conduct thorough testing of the fixed endpoint.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Implement detailed logging throughout the endpoint to facilitate debugging and monitoring. Log all API requests, responses, and any errors encountered. Include relevant information such as customer ID, campaign details, and operation status. Conduct comprehensive testing of the fixed endpoint to ensure it works correctly in all scenarios. Update any documentation or comments in the code to reflect the changes made.",
+            "testStrategy": "Perform integration testing with a test Google Ads account. Verify campaigns are created correctly with all specified parameters. Test error scenarios and verify logs contain sufficient information for troubleshooting. Validate that budget and targeting parameters are correctly applied."
+          },
+          {
+            "id": 6,
+            "title": "Add safeguards for keyword ideas endpoint",
+            "description": "Implement safeguards to ensure the working /keyword-ideas endpoint is not affected by campaign creation changes.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Analyze the shared code and dependencies between the campaign creation endpoint and the keyword ideas endpoint. Identify potential points of conflict or shared resources. Implement isolation measures such as separate service classes or modules to prevent changes to campaign creation from affecting the keyword ideas functionality. Add comprehensive tests specifically for the keyword ideas endpoint to verify it continues to work after campaign creation changes.",
+            "testStrategy": "Create a comprehensive test suite for the /keyword-ideas endpoint that can be run before and after campaign creation changes. Test the keyword ideas endpoint with various inputs to ensure all functionality remains intact. Implement automated regression tests that can be run during the deployment process."
+          },
+          {
+            "id": 7,
+            "title": "Implement deployment strategy for Render",
+            "description": "Create a deployment strategy that accounts for Render's 2-5 minute deployment window to ensure continuous service.",
+            "status": "pending",
+            "dependencies": [],
+            "details": "Design a deployment strategy that minimizes downtime and potential issues during Render's 2-5 minute deployment window. Consider implementing feature flags to gradually roll out changes. Create a rollback plan in case issues are detected after deployment. Document the deployment process with specific steps for verification during and after deployment. Consider implementing health checks that can detect if the deployment was successful.",
+            "testStrategy": "Test the deployment process in a staging environment that mimics the Render production environment. Simulate the 2-5 minute deployment window and verify that both endpoints continue to function or gracefully handle requests during deployment. Verify that health checks accurately reflect the system state during and after deployment."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Fix and Test Ad Group Creation Endpoint",
+        "description": "Debug, fix, and thoroughly test the POST /create-ad-group endpoint to ensure it properly creates ad groups with keywords in existing campaigns.",
+        "details": "1. Review current implementation of the ad group creation endpoint\n2. Fix any issues with the Google Ads API v19 integration\n3. Implement proper validation for all parameters (campaign_id, ad_group_name, keywords, max_cpc)\n4. Ensure the endpoint correctly creates ad groups and adds keywords with specified max CPC bids\n5. Use the latest google-ads Python library (version 22.0.0 or newer)\n6. Implement comprehensive error handling and logging\n7. Example implementation:\n```python\nfrom google.ads.googleads.client import GoogleAdsClient\nfrom google.ads.googleads.errors import GoogleAdsException\n\n@app.post('/create-ad-group')\nasync def create_ad_group(request: AdGroupRequest):\n    try:\n        client = GoogleAdsClient.load_from_storage('./google-ads.yaml')\n        ad_group_service = client.get_service('AdGroupService')\n        ad_group_criterion_service = client.get_service('AdGroupCriterionService')\n        \n        # Extract customer_id from campaign_id\n        customer_id = request.campaign_id.split('/')[1]\n        \n        # Create ad group\n        ad_group_operation = client.get_type('AdGroupOperation')\n        ad_group = ad_group_operation.create\n        ad_group.name = request.ad_group_name\n        ad_group.campaign = request.campaign_id\n        ad_group.status = client.enums.AdGroupStatusEnum.ENABLED\n        ad_group.type_ = client.enums.AdGroupTypeEnum.SEARCH_STANDARD\n        \n        # Add ad group\n        ad_group_response = ad_group_service.mutate_ad_groups(\n            customer_id=customer_id,\n            operations=[ad_group_operation]\n        )\n        \n        ad_group_id = ad_group_response.results[0].resource_name\n        \n        # Add keywords to ad group\n        keyword_operations = []\n        for keyword in request.keywords:\n            ad_group_criterion_operation = client.get_type('AdGroupCriterionOperation')\n            ad_group_criterion = ad_group_criterion_operation.create\n            ad_group_criterion.ad_group = ad_group_id\n            ad_group_criterion.status = client.enums.AdGroupCriterionStatusEnum.ENABLED\n            ad_group_criterion.keyword.text = keyword\n            ad_group_criterion.keyword.match_type = client.enums.KeywordMatchTypeEnum.EXACT\n            \n            # Set max CPC bid\n            ad_group_criterion.cpc_bid_micros = int(request.max_cpc * 1000000)\n            \n            keyword_operations.append(ad_group_criterion_operation)\n        \n        # Add keywords\n        keyword_response = ad_group_criterion_service.mutate_ad_group_criteria(\n            customer_id=customer_id,\n            operations=keyword_operations\n        )\n        \n        return {\n            \"ad_group_id\": ad_group_id,\n            \"keywords_added\": len(keyword_response.results),\n            \"status\": \"success\"\n        }\n    except GoogleAdsException as ex:\n        return {\n            \"status\": \"error\",\n            \"error\": ex.failure.errors[0].message,\n            \"error_code\": ex.failure.errors[0].error_code.request_error\n        }\n```",
+        "testStrategy": "1. Unit test the endpoint with mock Google Ads API responses\n2. Integration test with a test Google Ads account and existing campaigns\n3. Test with various keyword lists (short, long, with special characters)\n4. Test different match types and CPC bids\n5. Verify ad group and keyword creation in the Google Ads UI\n6. Test error scenarios (invalid campaign_id, invalid keywords, etc.)\n7. Measure response time to ensure it's under 5 seconds",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Review and Update Google Ads API Integration",
+            "description": "Analyze the current implementation and update to use Google Ads API v19 with the latest google-ads Python library (version 22.0.0 or newer).",
+            "dependencies": [],
+            "details": "Examine the existing code for compatibility issues with Google Ads API v19. Update import statements and client initialization to use the latest google-ads Python library. Verify service names and method signatures match the current API documentation. Update any deprecated methods or parameters.",
+            "status": "pending",
+            "testStrategy": "Verify successful client initialization with the updated library. Test basic connectivity to the Google Ads API. Confirm that service objects can be properly instantiated."
+          },
+          {
+            "id": 2,
+            "title": "Implement Parameter Validation",
+            "description": "Create comprehensive validation for all endpoint parameters including campaign_id, ad_group_name, keywords, and max_cpc.",
+            "dependencies": [],
+            "details": "Implement validation for campaign_id format and existence. Validate ad_group_name for length and allowed characters. Ensure keywords array contains valid entries and is not empty. Verify max_cpc is a positive number within acceptable range. Create clear error messages for each validation failure case.",
+            "status": "pending",
+            "testStrategy": "Test with valid and invalid inputs for each parameter. Verify appropriate error responses for missing required fields. Test edge cases like empty keyword lists, extremely long names, and invalid CPC values."
+          },
+          {
+            "id": 3,
+            "title": "Fix Ad Group Creation Logic",
+            "description": "Debug and fix the core functionality for creating ad groups with the proper configuration in existing campaigns.",
+            "dependencies": [
+              "2.1",
+              "2.2"
+            ],
+            "details": "Correct the ad group creation operation structure. Ensure proper extraction of customer_id from campaign_id. Fix the campaign reference format in the ad group object. Verify ad group type and status enums are correctly specified. Test the ad group creation in isolation before proceeding to keyword addition.",
+            "status": "pending",
+            "testStrategy": "Test creation of ad groups with various configurations. Verify the ad group appears correctly in the Google Ads account. Test with different campaign types to ensure compatibility."
+          },
+          {
+            "id": 4,
+            "title": "Implement Keyword Addition with CPC Bidding",
+            "description": "Fix the functionality to add keywords to the newly created ad group with specified max CPC bids.",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "Correct the keyword criterion operations structure. Implement proper handling of match types for keywords. Fix the CPC bid setting to correctly convert from dollars to micros. Ensure batch processing of multiple keywords works correctly. Add validation to prevent exceeding keyword limits per request.",
+            "status": "pending",
+            "testStrategy": "Test adding various numbers of keywords to ad groups. Verify keywords appear with correct match types and bids. Test with special characters and different languages. Verify performance with large keyword lists."
+          },
+          {
+            "id": 5,
+            "title": "Enhance Error Handling and Logging",
+            "description": "Implement comprehensive error handling and logging throughout the endpoint to improve debuggability and user experience.",
+            "dependencies": [
+              "2.3",
+              "2.4"
+            ],
+            "details": "Add structured error handling for all Google Ads API exceptions. Implement detailed logging at appropriate levels (info, warning, error). Create user-friendly error messages that hide implementation details but provide actionable information. Add request ID tracking for correlation. Implement retry logic for transient failures.",
+            "status": "pending",
+            "testStrategy": "Test various error scenarios including API quota exceeded, invalid customer ID, insufficient permissions, and network failures. Verify logs contain sufficient information for debugging. Test retry behavior for intermittent failures."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Update ChatGPT Actions for Campaign Creation",
+        "description": "Update the ChatGPT Actions integration to support campaign creation through natural language, ensuring the OpenAPI specification is properly configured.",
+        "details": "1. Update the existing chatgpt-action-openapi.yaml file to include the createCampaign action\n2. Ensure the schema definitions match the API endpoint parameters\n3. Add proper descriptions and examples for natural language understanding\n4. Test the integration with ChatGPT\n5. Example OpenAPI specification update:\n```yaml\npaths:\n  /create-campaign:\n    post:\n      operationId: createCampaign\n      summary: Create a new Google Ads campaign\n      description: Creates a new campaign in Google Ads with specified budget and targeting\n      x-openai-isConsequential: true\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              type: object\n              required:\n                - customer_id\n                - campaign_name\n                - budget_amount\n              properties:\n                customer_id:\n                  type: string\n                  description: Google Ads customer ID (without dashes)\n                  example: '1234567890'\n                campaign_name:\n                  type: string\n                  description: Name of the campaign\n                  example: 'Summer Sale 2023'\n                budget_amount:\n                  type: number\n                  description: Daily budget amount in the account currency\n                  example: 50.00\n                geo_targets:\n                  type: array\n                  description: List of location IDs for geo-targeting\n                  items:\n                    type: integer\n                  example: [2840, 2826] # US and UK\n                status:\n                  type: string\n                  description: Campaign status (ENABLED, PAUSED)\n                  enum: [ENABLED, PAUSED]\n                  default: PAUSED\n      responses:\n        '200':\n          description: Campaign created successfully\n          content:\n            application/json:\n              schema:\n                type: object\n                properties:\n                  campaign_id:\n                    type: string\n                    description: The ID of the created campaign\n                  status:\n                    type: string\n                    enum: [success, error]\n```\n6. Implement natural language parsing in the ChatGPT action handler\n7. Add validation to ensure all required parameters are extracted from natural language requests",
+        "testStrategy": "1. Test the OpenAPI specification with the ChatGPT Actions validator\n2. Test natural language requests like 'Create a new campaign called Summer Sale with a daily budget of $50 targeting the US'\n3. Verify that the action correctly extracts parameters from natural language\n4. Test error handling when parameters are missing or invalid\n5. Verify the campaign is created correctly in Google Ads\n6. Test different variations of natural language requests to ensure robustness",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Update ChatGPT Actions for Ad Group Creation",
+        "description": "Update the ChatGPT Actions integration to support ad group creation with keywords through natural language.",
+        "details": "1. Update the chatgpt-action-openapi.yaml file to include the createAdGroup action\n2. Ensure the schema definitions match the API endpoint parameters\n3. Add proper descriptions and examples for natural language understanding\n4. Test the integration with ChatGPT\n5. Example OpenAPI specification update:\n```yaml\npaths:\n  /create-ad-group:\n    post:\n      operationId: createAdGroup\n      summary: Create a new ad group with keywords\n      description: Creates a new ad group in an existing campaign and adds keywords with specified bids\n      x-openai-isConsequential: true\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema:\n              type: object\n              required:\n                - campaign_id\n                - ad_group_name\n                - keywords\n              properties:\n                campaign_id:\n                  type: string\n                  description: Google Ads campaign ID\n                  example: 'customers/1234567890/campaigns/9876543210'\n                ad_group_name:\n                  type: string\n                  description: Name of the ad group\n                  example: 'Bestselling Products'\n                keywords:\n                  type: array\n                  description: List of keywords to add to the ad group\n                  items:\n                    type: string\n                  example: ['buy product online', 'best product deals']\n                max_cpc:\n                  type: number\n                  description: Maximum cost per click bid in the account currency\n                  example: 1.50\n                  default: 1.00\n      responses:\n        '200':\n          description: Ad group created successfully\n          content:\n            application/json:\n              schema:\n                type: object\n                properties:\n                  ad_group_id:\n                    type: string\n                    description: The ID of the created ad group\n                  keywords_added:\n                    type: integer\n                    description: Number of keywords added\n                  status:\n                    type: string\n                    enum: [success, error]\n```\n6. Implement natural language parsing in the ChatGPT action handler\n7. Add validation to ensure all required parameters are extracted from natural language requests\n8. Implement keyword extraction from natural language input",
+        "testStrategy": "1. Test the OpenAPI specification with the ChatGPT Actions validator\n2. Test natural language requests like 'Create an ad group called Bestselling Products in campaign X with keywords \"buy product online\" and \"best product deals\" with a max CPC of $1.50'\n3. Verify that the action correctly extracts parameters from natural language\n4. Test error handling when parameters are missing or invalid\n5. Verify the ad group and keywords are created correctly in Google Ads\n6. Test different variations of natural language requests to ensure robustness",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement Comprehensive Error Handling",
+        "description": "Implement a comprehensive error handling system across all API endpoints to provide clear, actionable error messages and proper HTTP status codes.",
+        "details": "1. Create a centralized error handling module\n2. Define custom exception classes for different error types (AuthenticationError, ValidationError, GoogleAdsApiError, etc.)\n3. Implement middleware to catch and format errors consistently\n4. Add detailed logging for all errors\n5. Return appropriate HTTP status codes (400 for validation errors, 401 for auth errors, 500 for server errors, etc.)\n6. Include request IDs in error responses for tracking\n7. Example implementation:\n```python\nfrom fastapi import FastAPI, Request, status\nfrom fastapi.responses import JSONResponse\nfrom google.ads.googleads.errors import GoogleAdsException\nimport logging\nimport uuid\n\napp = FastAPI()\nlogger = logging.getLogger(__name__)\n\nclass ValidationError(Exception):\n    def __init__(self, message: str):\n        self.message = message\n\nclass AuthenticationError(Exception):\n    def __init__(self, message: str):\n        self.message = message\n\n@app.middleware(\"http\")\nasync def add_request_id(request: Request, call_next):\n    request_id = str(uuid.uuid4())\n    request.state.request_id = request_id\n    response = await call_next(request)\n    response.headers[\"X-Request-ID\"] = request_id\n    return response\n\n@app.exception_handler(ValidationError)\nasync def validation_exception_handler(request: Request, exc: ValidationError):\n    logger.error(f\"Validation error: {exc.message} (Request ID: {request.state.request_id})\")\n    return JSONResponse(\n        status_code=status.HTTP_400_BAD_REQUEST,\n        content={\n            \"status\": \"error\",\n            \"message\": exc.message,\n            \"request_id\": request.state.request_id,\n            \"error_type\": \"validation_error\"\n        }\n    )\n\n@app.exception_handler(AuthenticationError)\nasync def auth_exception_handler(request: Request, exc: AuthenticationError):\n    logger.error(f\"Authentication error: {exc.message} (Request ID: {request.state.request_id})\")\n    return JSONResponse(\n        status_code=status.HTTP_401_UNAUTHORIZED,\n        content={\n            \"status\": \"error\",\n            \"message\": exc.message,\n            \"request_id\": request.state.request_id,\n            \"error_type\": \"authentication_error\"\n        }\n    )\n\n@app.exception_handler(GoogleAdsException)\nasync def google_ads_exception_handler(request: Request, exc: GoogleAdsException):\n    error = exc.failure.errors[0]\n    logger.error(f\"Google Ads API error: {error.message} (Request ID: {request.state.request_id})\")\n    return JSONResponse(\n        status_code=status.HTTP_400_BAD_REQUEST,\n        content={\n            \"status\": \"error\",\n            \"message\": error.message,\n            \"error_code\": str(error.error_code),\n            \"request_id\": request.state.request_id,\n            \"error_type\": \"google_ads_api_error\"\n        }\n    )\n\n@app.exception_handler(Exception)\nasync def general_exception_handler(request: Request, exc: Exception):\n    logger.error(f\"Unexpected error: {str(exc)} (Request ID: {request.state.request_id})\")\n    return JSONResponse(\n        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,\n        content={\n            \"status\": \"error\",\n            \"message\": \"An unexpected error occurred\",\n            \"request_id\": request.state.request_id,\n            \"error_type\": \"server_error\"\n        }\n    )\n```\n8. Update all API endpoints to use these custom exceptions\n9. Add input validation using Pydantic models",
+        "testStrategy": "1. Unit test each exception handler\n2. Test error responses for each API endpoint with invalid inputs\n3. Verify correct HTTP status codes are returned\n4. Test logging functionality\n5. Verify request IDs are included in error responses\n6. Test Google Ads API specific errors\n7. Test authentication errors\n8. Test validation errors with various invalid inputs",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Centralized Error Handling Module",
+            "description": "Develop a centralized module to manage all error handling across the application",
+            "dependencies": [],
+            "details": "Create a dedicated module (error_handlers.py) that defines all exception classes and handlers. Implement custom exception classes for different error types including AuthenticationError, ValidationError, and GoogleAdsApiError. Ensure each exception class has appropriate attributes for error messages and additional context.",
+            "status": "pending",
+            "testStrategy": "Unit test each exception class to verify they capture appropriate information. Test that exceptions can be raised and caught correctly with proper attributes preserved."
+          },
+          {
+            "id": 2,
+            "title": "Implement Error Handling Middleware",
+            "description": "Create middleware to intercept and process all errors consistently across the application",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Implement HTTP middleware that adds request IDs to all requests and responses. Create exception handlers for each custom exception type that return appropriate HTTP status codes and formatted JSON responses. Implement a catch-all handler for unexpected exceptions that returns 500 status codes with sanitized error messages.",
+            "status": "pending",
+            "testStrategy": "Test middleware with various error scenarios to verify correct status codes and response formats. Verify request IDs are properly generated and included in responses. Test logging functionality to ensure errors are properly recorded."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Error Handling with Google Ads API",
+            "description": "Implement specific error handling for Google Ads API exceptions",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Create a dedicated exception handler for GoogleAdsException that extracts relevant error information from the Google Ads API response. Map Google Ads API error codes to appropriate HTTP status codes. Include Google Ads specific error details in the response such as error codes, request IDs, and actionable messages.",
+            "status": "pending",
+            "testStrategy": "Mock Google Ads API exceptions and verify they are caught and processed correctly. Test with various Google Ads API error scenarios to ensure proper error messages and status codes are returned."
+          },
+          {
+            "id": 4,
+            "title": "Implement Detailed Error Logging",
+            "description": "Set up comprehensive logging for all errors with contextual information",
+            "dependencies": [
+              "5.2",
+              "5.3"
+            ],
+            "details": "Configure structured logging that captures error details, request information, and stack traces. Implement different log levels for different types of errors (warning for validation errors, error for server errors, etc.). Include request IDs in all log entries for correlation. Set up log rotation and storage configuration.",
+            "status": "pending",
+            "testStrategy": "Verify logs contain all necessary information including request IDs, error messages, and stack traces. Test log output with different error scenarios. Ensure sensitive information is not logged."
+          },
+          {
+            "id": 5,
+            "title": "Update API Endpoints with Error Handling",
+            "description": "Refactor all existing API endpoints to use the new error handling system",
+            "dependencies": [
+              "5.1",
+              "5.2",
+              "5.3",
+              "5.4"
+            ],
+            "details": "Update all API endpoints to use custom exceptions instead of generic errors. Implement input validation using Pydantic models and raise appropriate ValidationError exceptions. Add try/except blocks where needed to catch and transform third-party exceptions into application-specific exceptions. Test each endpoint with various error scenarios.",
+            "status": "pending",
+            "testStrategy": "Test each API endpoint with valid and invalid inputs to verify correct error responses. Verify appropriate HTTP status codes are returned for different error types. Test with malformed requests and verify validation errors are properly handled."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement Rate Limiting",
+        "description": "Implement rate limiting for all API endpoints to prevent abuse and ensure compliance with Google Ads API quotas.",
+        "details": "1. Research Google Ads API rate limits (currently 15 QPS per developer token)\n2. Implement rate limiting middleware using a Redis backend for distributed rate limiting\n3. Set appropriate limits per endpoint and per user\n4. Add rate limit headers to responses\n5. Implement exponential backoff for retries\n6. Example implementation using FastAPI and slowapi:\n```python\nfrom fastapi import FastAPI, Request, Response\nfrom slowapi import Limiter, _rate_limit_exceeded_handler\nfrom slowapi.util import get_remote_address\nfrom slowapi.errors import RateLimitExceeded\nimport redis\n\n# Setup Redis for distributed rate limiting\nredis_client = redis.Redis.from_url(\"redis://localhost:6379/0\")\n\n# Create limiter\nlimiter = Limiter(key_func=get_remote_address, storage_uri=\"redis://localhost:6379/0\")\n\napp = FastAPI()\napp.state.limiter = limiter\napp.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)\n\n# Rate limit for keyword ideas endpoint (5 requests per minute per IP)\n@app.get(\"/keyword-ideas\")\n@limiter.limit(\"5/minute\")\nasync def get_keyword_ideas(request: Request):\n    # Endpoint implementation\n    pass\n\n# Rate limit for campaign creation (2 requests per minute per IP)\n@app.post(\"/create-campaign\")\n@limiter.limit(\"2/minute\")\nasync def create_campaign(request: Request):\n    # Endpoint implementation\n    pass\n\n# Rate limit for ad group creation (3 requests per minute per IP)\n@app.post(\"/create-ad-group\")\n@limiter.limit(\"3/minute\")\nasync def create_ad_group(request: Request):\n    # Endpoint implementation\n    pass\n\n# Add middleware to include rate limit headers in all responses\n@app.middleware(\"http\")\nasync def add_rate_limit_headers(request: Request, call_next):\n    response = await call_next(request)\n    response.headers[\"X-Rate-Limit-Limit\"] = \"Varies by endpoint\"\n    response.headers[\"X-Rate-Limit-Remaining\"] = \"See documentation\"\n    return response\n```\n7. Implement retry logic with exponential backoff for Google Ads API calls\n8. Add monitoring for rate limit hits",
+        "testStrategy": "1. Test rate limiting by making rapid API requests\n2. Verify rate limit headers are present in responses\n3. Test rate limit exceeded responses\n4. Test distributed rate limiting across multiple instances\n5. Test retry logic with simulated Google Ads API rate limit errors\n6. Verify exponential backoff works correctly\n7. Load test to ensure rate limiting doesn't impact normal usage\n8. Test rate limiting with different user IPs and authentication tokens",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Create API Documentation",
+        "description": "Create comprehensive API documentation using Swagger/OpenAPI to make the API easy to understand and use.",
+        "details": "1. Use FastAPI's built-in Swagger/OpenAPI support\n2. Add detailed descriptions for all endpoints, parameters, and responses\n3. Include example requests and responses\n4. Document authentication requirements\n5. Add rate limit information\n6. Create a separate documentation page with additional information\n7. Example FastAPI documentation setup:\n```python\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel, Field\nfrom typing import List, Optional\n\napp = FastAPI(\n    title=\"Google Ads MCP API\",\n    description=\"API for Google Ads keyword research and campaign management\",\n    version=\"1.0.0\",\n    docs_url=\"/docs\",\n    redoc_url=\"/redoc\",\n    openapi_url=\"/openapi.json\"\n)\n\nclass KeywordIdeasRequest(BaseModel):\n    customer_id: str = Field(..., description=\"Google Ads customer ID without dashes\", example=\"1234567890\")\n    seed_keywords: List[str] = Field(..., description=\"List of seed keywords to get ideas for\", example=[\"digital marketing\", \"seo services\"])\n    geo_targets: Optional[List[int]] = Field(None, description=\"List of location IDs for geo-targeting\", example=[2840, 2826])\n    language: Optional[str] = Field(\"en\", description=\"Language code\", example=\"en\")\n    limit: Optional[int] = Field(10, description=\"Maximum number of keyword ideas to return\", example=10)\n    \n    class Config:\n        schema_extra = {\n            \"example\": {\n                \"customer_id\": \"1234567890\",\n                \"seed_keywords\": [\"digital marketing\", \"seo services\"],\n                \"geo_targets\": [2840],\n                \"language\": \"en\",\n                \"limit\": 10\n            }\n        }\n\n@app.get(\n    \"/keyword-ideas\",\n    summary=\"Get keyword ideas from Google Ads\",\n    description=\"Retrieve keyword suggestions and metrics from Google Ads API based on seed keywords\",\n    response_description=\"List of keyword ideas with metrics\",\n    tags=[\"Keyword Research\"]\n)\nasync def get_keyword_ideas(request: KeywordIdeasRequest):\n    \"\"\"Get keyword ideas from Google Ads.\n    \n    This endpoint retrieves keyword suggestions and metrics from the Google Ads API based on seed keywords.\n    It returns real Google Ads data including search volume, competition, and bid estimates.\n    \n    Rate limit: 5 requests per minute per IP address.\n    \n    Authentication required: Google Ads API credentials must be provided.\n    \"\"\"\n    # Endpoint implementation\n    pass\n```\n8. Create a separate markdown documentation file with additional information\n9. Include authentication setup instructions\n10. Add troubleshooting section\n11. Document rate limits and quotas",
+        "testStrategy": "1. Verify all endpoints are properly documented in Swagger UI\n2. Test example requests in the Swagger UI\n3. Verify all parameters have clear descriptions\n4. Check that response schemas are correctly documented\n5. Test documentation with different browsers\n6. Verify authentication information is clear\n7. Have a team member review documentation for clarity\n8. Test API using only the documentation as a guide to verify completeness",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Unit Tests",
+        "description": "Implement comprehensive unit tests for all API endpoints and core functionality to ensure reliability and prevent regressions.",
+        "details": "1. Set up pytest as the testing framework\n2. Create mock responses for Google Ads API calls\n3. Test all API endpoints\n4. Test error handling\n5. Test authentication\n6. Test rate limiting\n7. Example test implementation:\n```python\nimport pytest\nfrom fastapi.testclient import TestClient\nfrom unittest.mock import patch, MagicMock\nfrom app.main import app\n\nclient = TestClient(app)\n\n# Mock Google Ads API responses\n@pytest.fixture\ndef mock_google_ads_client():\n    with patch('google.ads.googleads.client.GoogleAdsClient') as mock_client:\n        # Setup mock responses\n        mock_service = MagicMock()\n        mock_client.load_from_storage.return_value.get_service.return_value = mock_service\n        \n        # Mock keyword ideas response\n        mock_response = MagicMock()\n        mock_response.results = [\n            MagicMock(\n                keyword_idea=MagicMock(\n                    text=\"digital marketing agency\",\n                    keyword_annotations=MagicMock(\n                        search_volume=1000,\n                        competition=0.75\n                    )\n                )\n            )\n        ]\n        mock_service.generate_keyword_ideas.return_value = mock_response\n        \n        yield mock_client\n\ndef test_get_keyword_ideas(mock_google_ads_client):\n    response = client.get(\n        \"/keyword-ideas\",\n        params={\n            \"customer_id\": \"1234567890\",\n            \"seed_keywords\": \"digital marketing,seo services\",\n            \"geo_targets\": \"2840\",\n            \"language\": \"en\",\n            \"limit\": \"10\"\n        }\n    )\n    \n    assert response.status_code == 200\n    data = response.json()\n    assert len(data[\"keywords\"]) > 0\n    assert \"digital marketing agency\" in [k[\"text\"] for k in data[\"keywords\"]]\n    assert mock_google_ads_client.load_from_storage.called\n\ndef test_create_campaign(mock_google_ads_client):\n    # Setup mock for campaign creation\n    mock_campaign_service = mock_google_ads_client.load_from_storage.return_value.get_service.return_value\n    mock_response = MagicMock()\n    mock_response.results = [MagicMock(resource_name=\"customers/1234567890/campaigns/1234\")]\n    mock_campaign_service.mutate_campaigns.return_value = mock_response\n    \n    response = client.post(\n        \"/create-campaign\",\n        json={\n            \"customer_id\": \"1234567890\",\n            \"campaign_name\": \"Test Campaign\",\n            \"budget_amount\": 50.0,\n            \"geo_targets\": [2840],\n            \"status\": \"PAUSED\"\n        }\n    )\n    \n    assert response.status_code == 200\n    data = response.json()\n    assert data[\"status\"] == \"success\"\n    assert \"campaign_id\" in data\n    assert mock_campaign_service.mutate_campaigns.called\n\ndef test_error_handling():\n    response = client.get(\n        \"/keyword-ideas\",\n        params={\n            \"customer_id\": \"invalid\",\n            \"seed_keywords\": \"digital marketing\"\n        }\n    )\n    \n    assert response.status_code == 400\n    data = response.json()\n    assert data[\"status\"] == \"error\"\n    assert \"message\" in data\n```\n8. Set up GitHub Actions for continuous integration\n9. Add test coverage reporting\n10. Implement integration tests with a test Google Ads account",
+        "testStrategy": "1. Run tests automatically on each commit using GitHub Actions\n2. Aim for at least 80% test coverage\n3. Test happy paths and error scenarios\n4. Use parameterized tests for different input variations\n5. Test rate limiting functionality\n6. Test authentication and authorization\n7. Verify mocks are realistic and match actual Google Ads API responses\n8. Run integration tests weekly against a real Google Ads test account",
+        "priority": "high",
+        "dependencies": [
+          1,
+          2,
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Set up testing framework and environment",
+            "description": "Configure pytest as the testing framework, set up test fixtures, and establish the testing environment with necessary dependencies.",
+            "dependencies": [],
+            "details": "Install pytest and related packages (pytest-cov, pytest-mock). Configure pytest.ini with appropriate settings. Set up TestClient for FastAPI. Create base fixtures for mocking Google Ads API responses. Establish directory structure for tests following best practices.",
+            "status": "pending",
+            "testStrategy": "Verify pytest configuration works correctly. Ensure test fixtures can be imported and used across test files. Confirm mock objects behave as expected."
+          },
+          {
+            "id": 2,
+            "title": "Implement API endpoint tests",
+            "description": "Create comprehensive tests for all API endpoints including keyword ideas, campaign creation, and other core functionality.",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Develop tests for each endpoint using the TestClient. Create parameterized tests to cover different input scenarios. Test both successful responses and error cases. Verify correct status codes and response structures. Include tests for input validation and edge cases.",
+            "status": "pending",
+            "testStrategy": "Test each endpoint with valid inputs to verify successful operation. Test with invalid inputs to verify proper error handling. Use parameterized tests to cover multiple scenarios efficiently."
+          },
+          {
+            "id": 3,
+            "title": "Implement authentication and authorization tests",
+            "description": "Create tests to verify that authentication and authorization mechanisms work correctly for all protected endpoints.",
+            "dependencies": [
+              "8.1",
+              "8.2"
+            ],
+            "details": "Test authentication token validation. Verify access control for different user roles. Test expired token handling. Test invalid token scenarios. Verify proper error messages for authentication failures. Test session management if applicable.",
+            "status": "pending",
+            "testStrategy": "Test with valid credentials to verify successful authentication. Test with invalid or expired credentials to verify proper rejection. Test access control for different user roles and permissions."
+          },
+          {
+            "id": 4,
+            "title": "Implement rate limiting tests",
+            "description": "Create tests to verify that rate limiting functionality works correctly to prevent API abuse and ensure compliance with Google Ads API quotas.",
+            "dependencies": [
+              "8.1",
+              "8.2"
+            ],
+            "details": "Test rate limit enforcement for different endpoints. Verify rate limit headers in responses. Test behavior when limits are exceeded. Test distributed rate limiting if applicable. Test retry logic and exponential backoff implementation.",
+            "status": "pending",
+            "testStrategy": "Make rapid sequential requests to trigger rate limiting. Verify rate limit headers are present and accurate. Test behavior when rate limits are exceeded. Verify retry mechanisms work correctly with simulated rate limit errors."
+          },
+          {
+            "id": 5,
+            "title": "Set up CI/CD pipeline for tests",
+            "description": "Configure GitHub Actions for continuous integration to automatically run tests on each commit and generate test coverage reports.",
+            "dependencies": [
+              "8.1",
+              "8.2",
+              "8.3",
+              "8.4"
+            ],
+            "details": "Create GitHub Actions workflow file to run tests on each commit. Configure test coverage reporting with pytest-cov. Set up reporting to track coverage trends. Configure notifications for test failures. Establish minimum coverage thresholds.",
+            "status": "pending",
+            "testStrategy": "Verify GitHub Actions workflow runs successfully on commits. Confirm test coverage reports are generated correctly. Test the pipeline with both passing and failing tests to ensure proper reporting."
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Optimize Keyword Research Performance",
+        "description": "Optimize the keyword research endpoint to improve response times and handle larger keyword sets efficiently.",
+        "details": "1. Implement caching for keyword research results using Redis\n2. Add pagination for large result sets\n3. Optimize Google Ads API calls\n4. Implement parallel processing for multiple seed keywords\n5. Add result filtering options\n6. Example implementation with caching and pagination:\n```python\nfrom fastapi import FastAPI, Query, Depends, HTTPException\nfrom typing import List, Optional\nimport redis\nimport json\nimport hashlib\nfrom google.ads.googleads.client import GoogleAdsClient\n\napp = FastAPI()\n\n# Setup Redis for caching\nredis_client = redis.Redis.from_url(\"redis://localhost:6379/1\")\nCACHE_TTL = 3600  # 1 hour cache\n\ndef get_cache_key(customer_id, seed_keywords, geo_targets, language, limit):\n    \"\"\"Generate a unique cache key for the request parameters\"\"\"\n    key_parts = [\n        customer_id,\n        \",\".join(sorted(seed_keywords)),\n        \",\".join(sorted([str(g) for g in geo_targets])) if geo_targets else \"\",\n        language or \"\",\n        str(limit)\n    ]\n    return hashlib.md5(\"|\".join(key_parts).encode()).hexdigest()\n\n@app.get(\"/keyword-ideas\")\nasync def get_keyword_ideas(\n    customer_id: str,\n    seed_keywords: List[str] = Query(...),\n    geo_targets: Optional[List[int]] = Query(None),\n    language: Optional[str] = Query(\"en\"),\n    limit: Optional[int] = Query(10),\n    page: int = Query(1, ge=1),\n    page_size: int = Query(10, ge=1, le=100)\n):\n    # Check cache first\n    cache_key = get_cache_key(customer_id, seed_keywords, geo_targets, language, limit)\n    cached_result = redis_client.get(cache_key)\n    \n    if cached_result:\n        all_keywords = json.loads(cached_result)\n    else:\n        # Get results from Google Ads API\n        client = GoogleAdsClient.load_from_storage('./google-ads.yaml')\n        keyword_plan_idea_service = client.get_service('KeywordPlanIdeaService')\n        \n        # Build request\n        request = client.get_type('GenerateKeywordIdeasRequest')\n        request.customer_id = customer_id\n        request.language = language\n        request.include_adult_keywords = False\n        \n        # Add seed keywords\n        request.keyword_seed.keywords.extend(seed_keywords)\n        \n        # Add geo targeting\n        if geo_targets:\n            for geo_target in geo_targets:\n                request.geo_target_constants.append(f\"geoTargetConstants/{geo_target}\")\n        \n        # Execute request\n        response = keyword_plan_idea_service.generate_keyword_ideas(request=request)\n        \n        # Process results\n        all_keywords = []\n        for result in response.results:\n            keyword = {\n                \"text\": result.text,\n                \"search_volume\": result.keyword_idea_metrics.avg_monthly_searches,\n                \"competition\": result.keyword_idea_metrics.competition.name,\n                \"low_top_of_page_bid\": result.keyword_idea_metrics.low_top_of_page_bid_micros / 1000000,\n                \"high_top_of_page_bid\": result.keyword_idea_metrics.high_top_of_page_bid_micros / 1000000\n            }\n            all_keywords.append(keyword)\n        \n        # Sort by search volume (descending)\n        all_keywords.sort(key=lambda k: k[\"search_volume\"], reverse=True)\n        \n        # Limit results\n        all_keywords = all_keywords[:limit]\n        \n        # Cache results\n        redis_client.setex(cache_key, CACHE_TTL, json.dumps(all_keywords))\n    \n    # Apply pagination\n    start_idx = (page - 1) * page_size\n    end_idx = start_idx + page_size\n    paginated_keywords = all_keywords[start_idx:end_idx]\n    \n    return {\n        \"keywords\": paginated_keywords,\n        \"total\": len(all_keywords),\n        \"page\": page,\n        \"page_size\": page_size,\n        \"pages\": (len(all_keywords) + page_size - 1) // page_size\n    }\n```\n7. Add background processing for large keyword sets\n8. Implement request batching for multiple seed keywords",
+        "testStrategy": "1. Benchmark response times before and after optimization\n2. Test with large sets of seed keywords (10+)\n3. Verify caching works correctly\n4. Test pagination with different page sizes\n5. Verify results are consistent with and without caching\n6. Load test with concurrent requests\n7. Test with various geo-targeting options\n8. Verify response times meet the 5-second requirement",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Enhance Authentication and Security",
+        "description": "Enhance the authentication system and implement additional security measures to protect the API and Google Ads credentials.",
+        "details": "1. Implement API key authentication for all endpoints\n2. Store Google Ads credentials securely using environment variables or a secrets manager\n3. Add request validation and sanitization\n4. Implement CORS protection\n5. Add request logging for security auditing\n6. Example implementation:\n```python\nfrom fastapi import FastAPI, Depends, HTTPException, Security, status\nfrom fastapi.security.api_key import APIKeyHeader\nfrom starlette.middleware.cors import CORSMiddleware\nimport os\nfrom google.ads.googleads.client import GoogleAdsClient\nfrom google.oauth2 import service_account\nimport logging\n\napp = FastAPI()\n\n# Setup logging\nlogging.basicConfig(level=logging.INFO)\nlogger = logging.getLogger(__name__)\n\n# Setup CORS\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"https://chat.openai.com\", \"https://your-frontend-domain.com\"],\n    allow_credentials=True,\n    allow_methods=[\"GET\", \"POST\"],\n    allow_headers=[\"*\"],\n)\n\n# API Key authentication\nAPI_KEY_NAME = \"X-API-Key\"\napi_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)\n\nasync def get_api_key(api_key_header: str = Security(api_key_header)):\n    if api_key_header == os.environ.get(\"API_KEY\"):\n        return api_key_header\n    raise HTTPException(\n        status_code=status.HTTP_401_UNAUTHORIZED,\n        detail=\"Invalid API Key\",\n    )\n\n# Secure Google Ads client creation\ndef get_google_ads_client():\n    # Load credentials from environment variables\n    credentials_json = os.environ.get(\"GOOGLE_ADS_CREDENTIALS_JSON\")\n    developer_token = os.environ.get(\"GOOGLE_ADS_DEVELOPER_TOKEN\")\n    \n    if not credentials_json or not developer_token:\n        raise HTTPException(\n            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,\n            detail=\"Google Ads credentials not configured\"\n        )\n    \n    # Create credentials object\n    credentials = service_account.Credentials.from_service_account_info(\n        json.loads(credentials_json)\n    )\n    \n    # Create Google Ads client\n    client = GoogleAdsClient(\n        credentials=credentials,\n        developer_token=developer_token,\n        login_customer_id=None\n    )\n    \n    return client\n\n@app.get(\"/keyword-ideas\", dependencies=[Depends(get_api_key)])\nasync def get_keyword_ideas(customer_id: str):\n    # Log request for security auditing\n    logger.info(f\"Keyword ideas requested for customer_id: {customer_id}\")\n    \n    # Get Google Ads client\n    client = get_google_ads_client()\n    \n    # Rest of the implementation\n    pass\n```\n7. Add rate limiting per API key\n8. Implement IP allowlisting for additional security\n9. Add request and response encryption for sensitive data",
+        "testStrategy": "1. Test API key authentication with valid and invalid keys\n2. Verify CORS protection works correctly\n3. Test with missing or invalid Google Ads credentials\n4. Verify request logging captures necessary information\n5. Test rate limiting per API key\n6. Perform security scanning on the API\n7. Test IP allowlisting\n8. Verify sensitive data is properly protected",
+        "priority": "high",
+        "dependencies": [
+          5,
+          6
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Implement Automated Deployment Pipeline",
+        "description": "Set up an automated deployment pipeline using GitHub Actions and Render to streamline the deployment process and ensure consistent deployments.",
+        "details": "1. Create a GitHub Actions workflow for CI/CD\n2. Configure Render for automatic deployments\n3. Set up environment variable management\n4. Implement deployment testing\n5. Add monitoring and alerts\n6. Example GitHub Actions workflow:\n```yaml\nname: CI/CD Pipeline\n\non:\n  push:\n    branches: [ main ]\n  pull_request:\n    branches: [ main ]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n    - uses: actions/checkout@v3\n    - name: Set up Python\n      uses: actions/setup-python@v4\n      with:\n        python-version: '3.10'\n    - name: Install dependencies\n      run: |\n        python -m pip install --upgrade pip\n        pip install pytest pytest-cov\n        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi\n    - name: Run tests\n      run: |\n        pytest --cov=app tests/\n    - name: Upload coverage report\n      uses: codecov/codecov-action@v3\n\n  deploy:\n    needs: test\n    if: github.ref == 'refs/heads/main'\n    runs-on: ubuntu-latest\n    steps:\n    - uses: actions/checkout@v3\n    - name: Deploy to Render\n      uses: JorgeLNJunior/render-deploy@v1.4.3\n      with:\n        service_id: ${{ secrets.RENDER_SERVICE_ID }}\n        api_key: ${{ secrets.RENDER_API_KEY }}\n        wait_deploy: true\n        deployment_hook_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}\n    - name: Run smoke tests\n      run: |\n        # Simple smoke test to verify deployment\n        curl -f https://your-api-url.onrender.com/health\n```\n7. Create a render.yaml file for Render configuration:\n```yaml\nservices:\n  - type: web\n    name: google-ads-mcp-api\n    env: python\n    buildCommand: pip install -r requirements.txt\n    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT\n    envVars:\n      - key: GOOGLE_ADS_DEVELOPER_TOKEN\n        sync: false\n      - key: GOOGLE_ADS_CREDENTIALS_JSON\n        sync: false\n      - key: API_KEY\n        sync: false\n      - key: REDIS_URL\n        sync: false\n    healthCheckPath: /health\n    autoDeploy: true\n```\n8. Add a health check endpoint to the API\n9. Set up monitoring with Render's built-in monitoring or a third-party service",
+        "testStrategy": "1. Test the GitHub Actions workflow with test commits\n2. Verify automatic deployments to Render\n3. Test rollback functionality\n4. Verify environment variables are correctly set in Render\n5. Test health check endpoint\n6. Verify monitoring and alerts work correctly\n7. Test deployment with breaking changes to ensure pipeline catches issues\n8. Verify deployment time meets requirements",
+        "priority": "medium",
+        "dependencies": [
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Implement Logging and Monitoring",
+        "description": "Implement comprehensive logging and monitoring to track API usage, performance, and errors.",
+        "details": "1. Set up structured logging with contextual information\n2. Implement request/response logging\n3. Add performance monitoring\n4. Set up error alerting\n5. Create dashboards for key metrics\n6. Example implementation:\n```python\nfrom fastapi import FastAPI, Request, Response\nfrom fastapi.middleware.cors import CORSMiddleware\nimport time\nimport logging\nimport json\nimport structlog\nfrom typing import Callable\nimport os\n\n# Configure structured logging\nstructlog.configure(\n    processors=[\n        structlog.stdlib.filter_by_level,\n        structlog.stdlib.add_logger_name,\n        structlog.stdlib.add_log_level,\n        structlog.stdlib.PositionalArgumentsFormatter(),\n        structlog.processors.TimeStamper(fmt=\"iso\"),\n        structlog.processors.JSONRenderer()\n    ],\n    logger_factory=structlog.stdlib.LoggerFactory(),\n    wrapper_class=structlog.stdlib.BoundLogger,\n    cache_logger_on_first_use=True,\n)\n\nlogger = structlog.get_logger()\n\napp = FastAPI()\n\n# Middleware for request logging and timing\n@app.middleware(\"http\")\nasync def logging_middleware(request: Request, call_next: Callable) -> Response:\n    start_time = time.time()\n    \n    # Get request details\n    path = request.url.path\n    method = request.method\n    query_params = dict(request.query_params)\n    \n    # Create request_id\n    request_id = request.headers.get(\"X-Request-ID\") or str(uuid.uuid4())\n    \n    # Add context to all log entries in this request\n    log = logger.bind(\n        request_id=request_id,\n        path=path,\n        method=method,\n    )\n    \n    # Log request\n    log.info(\n        \"request_started\",\n        query_params=query_params,\n    )\n    \n    # Process request\n    try:\n        response = await call_next(request)\n        status_code = response.status_code\n        \n        # Calculate duration\n        duration = time.time() - start_time\n        \n        # Log response\n        log.info(\n            \"request_completed\",\n            status_code=status_code,\n            duration=duration,\n        )\n        \n        # Add headers to response\n        response.headers[\"X-Request-ID\"] = request_id\n        response.headers[\"X-Process-Time\"] = str(duration)\n        \n        return response\n    except Exception as e:\n        # Log exception\n        log.error(\n            \"request_failed\",\n            error=str(e),\n            exception_type=type(e).__name__,\n            duration=time.time() - start_time,\n        )\n        raise\n\n# Health check endpoint for monitoring\n@app.get(\"/health\")\nasync def health_check():\n    return {\n        \"status\": \"healthy\",\n        \"version\": os.environ.get(\"APP_VERSION\", \"unknown\"),\n        \"timestamp\": time.time()\n    }\n\n# Metrics endpoint for monitoring systems\n@app.get(\"/metrics\")\nasync def metrics():\n    # Implement custom metrics collection\n    # This could be replaced with a proper metrics library like prometheus_client\n    return {\n        \"requests_total\": 100,  # Example metric\n        \"request_duration_seconds\": 0.5,  # Example metric\n        \"errors_total\": 5,  # Example metric\n    }\n```\n7. Set up log aggregation with a service like Datadog, New Relic, or ELK stack\n8. Implement custom metrics for Google Ads API usage\n9. Add alerting for critical errors and performance issues",
+        "testStrategy": "1. Verify logs are properly structured and contain all necessary information\n2. Test log output with different request scenarios\n3. Verify performance metrics are accurately recorded\n4. Test error logging with simulated errors\n5. Verify health check endpoint returns correct information\n6. Test metrics endpoint\n7. Verify alerts are triggered for critical errors\n8. Test log aggregation with the chosen service",
+        "priority": "medium",
+        "dependencies": [
+          5,
+          11
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 13,
+        "title": "Implement Campaign Performance Monitoring",
+        "description": "Implement a new endpoint to retrieve campaign performance metrics from Google Ads API.",
+        "details": "1. Create a new endpoint for retrieving campaign performance data\n2. Implement Google Ads API integration for performance metrics\n3. Add filtering and date range options\n4. Implement caching for performance data\n5. Example implementation:\n```python\nfrom fastapi import FastAPI, Query, Depends, HTTPException\nfrom typing import List, Optional\nfrom datetime import datetime, timedelta\nimport redis\nimport json\nfrom google.ads.googleads.client import GoogleAdsClient\n\napp = FastAPI()\n\n# Setup Redis for caching\nredis_client = redis.Redis.from_url(\"redis://localhost:6379/1\")\nCACHE_TTL = 3600  # 1 hour cache\n\n@app.get(\"/campaign-performance\")\nasync def get_campaign_performance(\n    customer_id: str,\n    campaign_id: Optional[str] = None,\n    start_date: Optional[str] = Query(None, description=\"Format: YYYY-MM-DD\"),\n    end_date: Optional[str] = Query(None, description=\"Format: YYYY-MM-DD\"),\n    metrics: List[str] = Query([\"impressions\", \"clicks\", \"cost\", \"conversions\"], description=\"Metrics to include\")\n):\n    # Set default date range if not provided\n    if not start_date:\n        start_date = (datetime.now() - timedelta(days=30)).strftime(\"%Y-%m-%d\")\n    if not end_date:\n        end_date = datetime.now().strftime(\"%Y-%m-%d\")\n    \n    # Check cache\n    cache_key = f\"performance:{customer_id}:{campaign_id or 'all'}:{start_date}:{end_date}:{','.join(sorted(metrics))}\"\n    cached_result = redis_client.get(cache_key)\n    \n    if cached_result:\n        return json.loads(cached_result)\n    \n    # Get data from Google Ads API\n    client = GoogleAdsClient.load_from_storage('./google-ads.yaml')\n    ga_service = client.get_service('GoogleAdsService')\n    \n    # Build query\n    query = f\"\"\"\n        SELECT \n            campaign.id, \n            campaign.name, \n            metrics.impressions, \n            metrics.clicks, \n            metrics.cost_micros, \n            metrics.conversions,\n            metrics.ctr,\n            metrics.average_cpc,\n            metrics.conversion_rate\n        FROM campaign \n        WHERE segments.date BETWEEN '{start_date}' AND '{end_date}'\n    \"\"\"\n    \n    # Add campaign filter if specified\n    if campaign_id:\n        query += f\" AND campaign.id = {campaign_id.split('/')[-1]}\"\n    \n    # Execute query\n    response = ga_service.search(\n        customer_id=customer_id,\n        query=query,\n        page_size=1000\n    )\n    \n    # Process results\n    results = []\n    for row in response:\n        campaign_data = {\n            \"campaign_id\": row.campaign.id,\n            \"campaign_name\": row.campaign.name,\n            \"impressions\": row.metrics.impressions,\n            \"clicks\": row.metrics.clicks,\n            \"cost\": row.metrics.cost_micros / 1000000,  # Convert to currency units\n            \"conversions\": row.metrics.conversions,\n            \"ctr\": row.metrics.ctr,\n            \"average_cpc\": row.metrics.average_cpc.value / 1000000 if row.metrics.average_cpc.value else 0,\n            \"conversion_rate\": row.metrics.conversion_rate\n        }\n        results.append(campaign_data)\n    \n    # Filter metrics if needed\n    if metrics and metrics != [\"impressions\", \"clicks\", \"cost\", \"conversions\"]:\n        for result in results:\n            result = {k: v for k, v in result.items() if k in metrics or k in [\"campaign_id\", \"campaign_name\"]}\n    \n    # Calculate totals\n    totals = {\n        \"impressions\": sum(r[\"impressions\"] for r in results),\n        \"clicks\": sum(r[\"clicks\"] for r in results),\n        \"cost\": sum(r[\"cost\"] for r in results),\n        \"conversions\": sum(r[\"conversions\"] for r in results),\n    }\n    \n    if totals[\"impressions\"] > 0:\n        totals[\"ctr\"] = totals[\"clicks\"] / totals[\"impressions\"] * 100\n    else:\n        totals[\"ctr\"] = 0\n        \n    if totals[\"clicks\"] > 0:\n        totals[\"average_cpc\"] = totals[\"cost\"] / totals[\"clicks\"]\n    else:\n        totals[\"average_cpc\"] = 0\n        \n    if totals[\"clicks\"] > 0:\n        totals[\"conversion_rate\"] = totals[\"conversions\"] / totals[\"clicks\"] * 100\n    else:\n        totals[\"conversion_rate\"] = 0\n    \n    response_data = {\n        \"campaigns\": results,\n        \"totals\": totals,\n        \"date_range\": {\n            \"start_date\": start_date,\n            \"end_date\": end_date\n        }\n    }\n    \n    # Cache results\n    redis_client.setex(cache_key, CACHE_TTL, json.dumps(response_data))\n    \n    return response_data\n```\n6. Add support for comparing performance across time periods\n7. Implement visualization data formatting\n8. Add support for ad group and keyword level performance data",
+        "testStrategy": "1. Test with different date ranges\n2. Verify metrics calculations are correct\n3. Test with specific campaign IDs\n4. Test with different metric combinations\n5. Verify caching works correctly\n6. Test performance with large data sets\n7. Verify totals are calculated correctly\n8. Test error handling for invalid inputs",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 14,
+        "title": "Implement Bulk Keyword Upload",
+        "description": "Implement a new endpoint for bulk keyword upload to ad groups to improve efficiency for users managing large keyword sets.",
+        "details": "1. Create a new endpoint for bulk keyword upload\n2. Support CSV or JSON input formats\n3. Implement batch processing for large keyword sets\n4. Add validation for keywords\n5. Example implementation:\n```python\nfrom fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks\nfrom typing import List, Optional\nimport csv\nimport io\nimport json\nfrom google.ads.googleads.client import GoogleAdsClient\nfrom google.ads.googleads.errors import GoogleAdsException\n\napp = FastAPI()\n\n@app.post(\"/bulk-upload-keywords\")\nasync def bulk_upload_keywords(\n    background_tasks: BackgroundTasks,\n    customer_id: str = Form(...),\n    ad_group_id: str = Form(...),\n    file: Optional[UploadFile] = File(None),\n    keywords_json: Optional[str] = Form(None),\n    match_type: str = Form(\"EXACT\", description=\"EXACT, PHRASE, or BROAD\"),\n    max_cpc: float = Form(1.0, description=\"Maximum CPC bid\"),\n):\n    # Validate input\n    if not file and not keywords_json:\n        raise HTTPException(status_code=400, detail=\"Either file or keywords_json must be provided\")\n    \n    # Parse keywords from file or JSON\n    keywords = []\n    if file:\n        content = await file.read()\n        if file.filename.endswith('.csv'):\n            # Parse CSV\n            csv_reader = csv.reader(io.StringIO(content.decode('utf-8')))\n            for row in csv_reader:\n                if row and row[0].strip():  # Skip empty rows\n                    keywords.append(row[0].strip())\n        elif file.filename.endswith('.json'):\n            # Parse JSON\n            data = json.loads(content)\n            if isinstance(data, list):\n                keywords = data\n            elif isinstance(data, dict) and 'keywords' in data:\n                keywords = data['keywords']\n        else:\n            raise HTTPException(status_code=400, detail=\"Unsupported file format. Use CSV or JSON.\")\n    elif keywords_json:\n        # Parse JSON string\n        data = json.loads(keywords_json)\n        if isinstance(data, list):\n            keywords = data\n        elif isinstance(data, dict) and 'keywords' in data:\n            keywords = data['keywords']\n    \n    # Validate keywords\n    if not keywords:\n        raise HTTPException(status_code=400, detail=\"No valid keywords found\")\n    \n    # Deduplicate keywords\n    keywords = list(set(keywords))\n    \n    # Start background task for processing\n    background_tasks.add_task(\n        process_bulk_keywords,\n        customer_id,\n        ad_group_id,\n        keywords,\n        match_type,\n        max_cpc\n    )\n    \n    return {\n        \"status\": \"processing\",\n        \"keywords_count\": len(keywords),\n        \"message\": \"Keywords are being processed in the background\"\n    }\n\nasync def process_bulk_keywords(customer_id, ad_group_id, keywords, match_type, max_cpc):\n    \"\"\"Process keywords in batches\"\"\"\n    try:\n        client = GoogleAdsClient.load_from_storage('./google-ads.yaml')\n        ad_group_criterion_service = client.get_service('AdGroupCriterionService')\n        \n        # Process in batches of 5000 (Google Ads API limit)\n        batch_size = 5000\n        results = {\n            \"total\": len(keywords),\n            \"successful\": 0,\n            \"failed\": 0,\n            \"errors\": []\n        }\n        \n        for i in range(0, len(keywords), batch_size):\n            batch = keywords[i:i+batch_size]\n            operations = []\n            \n            for keyword in batch:\n                # Create operation\n                operation = client.get_type('AdGroupCriterionOperation')\n                criterion = operation.create\n                criterion.ad_group = ad_group_id\n                criterion.status = client.enums.AdGroupCriterionStatusEnum.ENABLED\n                criterion.keyword.text = keyword\n                criterion.keyword.match_type = client.enums.KeywordMatchTypeEnum[match_type]\n                \n                # Set bid\n                criterion.cpc_bid_micros = int(max_cpc * 1000000)\n                \n                operations.append(operation)\n            \n            try:\n                # Add keywords\n                response = ad_group_criterion_service.mutate_ad_group_criteria(\n                    customer_id=customer_id,\n                    operations=operations\n                )\n                results[\"successful\"] += len(response.results)\n            except GoogleAdsException as ex:\n                results[\"failed\"] += len(batch)\n                for error in ex.failure.errors:\n                    results[\"errors\"].append({\n                        \"message\": error.message,\n                        \"error_code\": error.error_code.request_error.name\n                    })\n        \n        # Store results for later retrieval\n        # This could be stored in a database or cache\n        \n    except Exception as e:\n        # Log error\n        print(f\"Error processing bulk keywords: {str(e)}\")\n```\n6. Add a status endpoint to check the progress of bulk uploads\n7. Implement error handling for invalid keywords\n8. Add support for different match types and bid strategies",
+        "testStrategy": "1. Test with CSV and JSON input formats\n2. Test with large keyword sets (10,000+ keywords)\n3. Verify batch processing works correctly\n4. Test with different match types\n5. Test error handling for invalid keywords\n6. Verify background processing works correctly\n7. Test status endpoint\n8. Verify keywords are added correctly to the ad group",
+        "priority": "low",
+        "dependencies": [
+          2,
+          5
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 15,
+        "title": "Implement Ad Copy Generation",
+        "description": "Implement a new endpoint for generating ad copy suggestions based on keywords and landing page content.",
+        "details": "1. Create a new endpoint for ad copy generation\n2. Integrate with OpenAI API for generating ad copy\n3. Add parameters for customizing ad copy generation\n4. Implement landing page content extraction\n5. Example implementation:\n```python\nfrom fastapi import FastAPI, HTTPException\nfrom typing import List, Optional\nimport openai\nimport requests\nfrom bs4 import BeautifulSoup\nimport os\n\napp = FastAPI()\n\n# Set OpenAI API key\nopenai.api_key = os.environ.get(\"OPENAI_API_KEY\")\n\n@app.post(\"/generate-ad-copy\")\nasync def generate_ad_copy(\n    keywords: List[str],\n    landing_page_url: Optional[str] = None,\n    product_name: Optional[str] = None,\n    brand_name: Optional[str] = None,\n    target_audience: Optional[str] = None,\n    unique_selling_points: Optional[List[str]] = None,\n    num_variations: int = 3,\n    max_headline_length: int = 30,\n    max_description_length: int = 90\n):\n    # Extract landing page content if URL provided\n    landing_page_content = \"\"\n    if landing_page_url:\n        try:\n            response = requests.get(landing_page_url, timeout=10)\n            response.raise_for_status()\n            soup = BeautifulSoup(response.text, 'html.parser')\n            \n            # Extract title, meta description, and main content\n            title = soup.title.string if soup.title else \"\"\n            meta_desc = soup.find('meta', attrs={'name': 'description'})\n            meta_description = meta_desc['content'] if meta_desc else \"\"\n            \n            # Extract main content (simplified)\n            main_content = ' '.join([p.text for p in soup.find_all('p')][:5])  # First 5 paragraphs\n            \n            landing_page_content = f\"Title: {title}\\nDescription: {meta_description}\\nContent: {main_content[:500]}\"\n        except Exception as e:\n            landing_page_content = \"Failed to extract landing page content.\"\n    \n    # Prepare prompt for OpenAI\n    prompt = f\"Generate {num_variations} Google Ads copy variations with the following requirements:\\n\"\n    prompt += f\"- Keywords: {', '.join(keywords)}\\n\"\n    if product_name:\n        prompt += f\"- Product: {product_name}\\n\"\n    if brand_name:\n        prompt += f\"- Brand: {brand_name}\\n\"\n    if target_audience:\n        prompt += f\"- Target Audience: {target_audience}\\n\"\n    if unique_selling_points:\n        prompt += f\"- Unique Selling Points: {', '.join(unique_selling_points)}\\n\"\n    \n    prompt += f\"- Headlines must be {max_headline_length} characters or less\\n\"\n    prompt += f\"- Descriptions must be {max_description_length} characters or less\\n\"\n    prompt += \"- Include 3 headlines and 2 descriptions for each variation\\n\"\n    prompt += \"- Format as JSON with an array of objects, each with 'headlines' and 'descriptions' arrays\\n\"\n    \n    if landing_page_content:\n        prompt += f\"\\nLanding Page Information:\\n{landing_page_content}\"\n    \n    try:\n        # Call OpenAI API\n        response = openai.ChatCompletion.create(\n            model=\"gpt-4\",\n            messages=[\n                {\"role\": \"system\", \"content\": \"You are an expert Google Ads copywriter. Create compelling, conversion-focused ad copy that follows Google Ads guidelines.\"},\n                {\"role\": \"user\", \"content\": prompt}\n            ],\n            temperature=0.7,\n            max_tokens=1000,\n            response_format={\"type\": \"json_object\"}\n        )\n        \n        # Parse response\n        content = response.choices[0].message.content\n        ad_variations = json.loads(content)\n        \n        # Validate and format response\n        formatted_variations = []\n        for variation in ad_variations.get(\"variations\", []):\n            headlines = variation.get(\"headlines\", [])\n            descriptions = variation.get(\"descriptions\", [])\n            \n            # Validate lengths\n            headlines = [h for h in headlines if len(h) <= max_headline_length]\n            descriptions = [d for d in descriptions if len(d) <= max_description_length]\n            \n            formatted_variations.append({\n                \"headlines\": headlines,\n                \"descriptions\": descriptions\n            })\n        \n        return {\n            \"ad_variations\": formatted_variations,\n            \"keywords_used\": keywords,\n            \"landing_page_analyzed\": landing_page_url is not None\n        }\n    except Exception as e:\n        raise HTTPException(status_code=500, detail=f\"Error generating ad copy: {str(e)}\")\n```\n6. Add support for different ad formats (responsive search ads, expanded text ads)\n7. Implement ad copy quality scoring\n8. Add support for generating ad copy in multiple languages",
+        "testStrategy": "1. Test with different keyword sets\n2. Test with and without landing page URLs\n3. Verify ad copy meets character limits\n4. Test with different parameters (product name, brand name, etc.)\n5. Verify OpenAI integration works correctly\n6. Test landing page content extraction with different websites\n7. Test error handling for invalid inputs\n8. Verify the quality and relevance of generated ad copy",
+        "priority": "low",
+        "dependencies": [
+          5,
+          8
+        ],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 16,
+        "title": "Implement Safeguards and Deployment Strategy for Keyword Ideas Endpoint",
+        "description": "Establish safeguards for the keyword ideas endpoint and implement proper deployment timing considerations for Render, including regression tests, verification steps, and a rollback strategy.",
+        "details": "1. Create comprehensive regression test suite for the keyword ideas endpoint:\n   - Implement unit tests covering all edge cases and parameter combinations\n   - Create integration tests that verify end-to-end functionality\n   - Set up automated test runs before each deployment\n\n2. Implement deployment verification steps:\n   - Create a pre-deployment checklist to ensure all safeguards are in place\n   - Implement a blue-green deployment strategy on Render to minimize downtime\n   - Set up health check endpoints specifically for the keyword ideas functionality\n   - Create a deployment verification script that runs post-deployment tests\n\n3. Establish a rollback strategy:\n   - Configure Render to maintain previous deployment versions\n   - Implement automated rollback triggers based on error rates and performance metrics\n   - Create a rollback procedure document with step-by-step instructions\n   - Set up monitoring alerts that trigger when the endpoint performance degrades\n\n4. Implement feature flags for the keyword ideas endpoint:\n   - Use a feature flag service (like LaunchDarkly or a custom implementation)\n   - Enable gradual rollout capabilities for new features\n   - Allow for quick disabling of problematic features without full rollback\n\n5. Set up performance monitoring:\n   - Implement detailed logging for the keyword ideas endpoint\n   - Set up dashboards to monitor endpoint performance and error rates\n   - Configure alerts for abnormal behavior\n\n6. Example implementation for health check endpoint:\n```python\n@app.get(\"/health/keyword-ideas\", tags=[\"Health\"])\nasync def keyword_ideas_health():\n    try:\n        # Test with minimal query to verify endpoint functionality\n        test_result = await get_keyword_ideas(\n            customer_id=os.environ.get(\"TEST_CUSTOMER_ID\"),\n            seed_keywords=[\"test\"],\n            language_code=\"en\",\n            country_code=\"US\"\n        )\n        \n        # Verify response structure\n        if not test_result or \"keywordIdeas\" not in test_result:\n            return {\"status\": \"error\", \"message\": \"Invalid response structure\"}\n            \n        return {\n            \"status\": \"healthy\",\n            \"timestamp\": datetime.now().isoformat(),\n            \"responseTime\": test_result.get(\"responseTime\", \"unknown\")\n        }\n    except Exception as e:\n        return {\n            \"status\": \"error\",\n            \"message\": str(e),\n            \"timestamp\": datetime.now().isoformat()\n        }\n```\n\n7. Example implementation for feature flags:\n```python\nfrom fastapi import FastAPI, Depends, HTTPException, Query\nimport os\nfrom typing import List, Optional\nimport redis\n\napp = FastAPI()\n\n# Setup Redis for feature flags\nredis_client = redis.Redis.from_url(os.environ.get(\"REDIS_URL\"))\n\ndef is_feature_enabled(feature_name: str, default: bool = False) -> bool:\n    \"\"\"Check if a feature is enabled via feature flags\"\"\"\n    try:\n        flag = redis_client.get(f\"feature:{feature_name}\")\n        if flag is None:\n            return default\n        return flag.decode() == \"true\"\n    except Exception:\n        return default\n\n@app.get(\"/keyword-ideas\")\nasync def keyword_ideas_endpoint(\n    customer_id: str,\n    seed_keywords: List[str] = Query(...),\n    language_code: str = \"en\",\n    country_code: str = \"US\",\n):\n    # Check if the endpoint is enabled\n    if not is_feature_enabled(\"keyword_ideas_endpoint\", default=True):\n        raise HTTPException(status_code=503, detail=\"This feature is currently disabled\")\n    \n    # Proceed with normal endpoint logic\n    # ...\n```",
+        "testStrategy": "1. Regression Test Suite Verification:\n   - Verify all unit tests for the keyword ideas endpoint pass\n   - Confirm integration tests cover all critical paths and edge cases\n   - Test with invalid inputs to ensure proper error handling\n   - Verify tests run automatically in the CI/CD pipeline\n\n2. Deployment Process Testing:\n   - Test the blue-green deployment process on Render with a minor change\n   - Verify zero downtime during deployment\n   - Confirm health check endpoints correctly identify service status\n   - Test the deployment verification script with both successful and failing scenarios\n\n3. Rollback Strategy Testing:\n   - Simulate a failed deployment and verify automatic rollback triggers\n   - Test manual rollback procedure and measure time to restore service\n   - Verify previous versions are properly maintained on Render\n   - Confirm that rollback preserves data integrity\n\n4. Feature Flag Testing:\n   - Test enabling and disabling features via feature flags\n   - Verify gradual rollout functionality works as expected\n   - Confirm that disabling a feature via flags doesn't affect other functionality\n   - Test feature flag persistence across deployments\n\n5. Performance Monitoring Testing:\n   - Verify logs capture all relevant information for troubleshooting\n   - Test alert triggers with simulated error conditions\n   - Confirm dashboard displays accurate real-time metrics\n   - Verify that performance degradation triggers appropriate alerts\n\n6. End-to-End Verification:\n   - Perform a complete deployment cycle from development to production\n   - Verify all safeguards activate appropriately during the process\n   - Confirm that monitoring captures the entire deployment process\n   - Test the system's response to various failure scenarios",
+        "status": "pending",
+        "dependencies": [
+          5,
+          8,
+          11,
+          12
+        ],
+        "priority": "high",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-31T22:15:23.517Z",
+      "updated": "2025-07-31T22:31:21.638Z",
+      "description": "Tasks for master context"
+    }
+  }
+}

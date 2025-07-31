@@ -1837,3 +1837,6 @@ if __name__ == "__main__":
     mcp.run(transport="stdio")
     # Optionally, you can also run the FastAPI app locally for testing:
     # uvicorn.run(app, host="0.0.0.0", port=8080)
+
+# For Render deployment, we need to expose the FastAPI app
+# This allows Render to run the FastAPI app directly

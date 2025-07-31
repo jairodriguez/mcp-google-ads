@@ -1,0 +1,98 @@
+# Google Ads MCP API - Product Requirements Document
+
+## Project Overview
+A FastAPI-based Google Ads API integration that provides keyword research and campaign creation capabilities through both REST API endpoints and ChatGPT Actions. The system enables users to get real keyword data from Google Ads and create campaigns directly in Google Ads accounts.
+
+## Current Status
+- ✅ Keyword research endpoint working (/keyword-ideas)
+- ✅ Authentication with Google Ads API working
+- ✅ ChatGPT Actions integration working
+- ❌ Campaign creation endpoints need API fixes
+- ❌ Ad group creation endpoints need testing
+
+## Core Features
+
+### 1. Keyword Research System
+- **Endpoint**: GET /keyword-ideas
+- **Functionality**: Retrieve keyword suggestions and metrics from Google Ads API
+- **Parameters**: customer_id, seed keywords, geo targeting, language, limit
+- **Response**: Real Google Ads data with search volume, competition, bid estimates
+- **Status**: ✅ WORKING
+
+### 2. Campaign Creation System
+- **Endpoint**: POST /create-campaign
+- **Functionality**: Create Google Ads campaigns with budget and targeting
+- **Parameters**: customer_id, campaign_name, budget_amount, geo_targets, status
+- **Response**: Campaign ID and success status
+- **Status**: ❌ NEEDS API FIXES
+
+### 3. Ad Group Creation System
+- **Endpoint**: POST /create-ad-group
+- **Functionality**: Create ad groups with keywords in existing campaigns
+- **Parameters**: campaign_id, ad_group_name, keywords, max_cpc
+- **Response**: Ad group ID and success status
+- **Status**: ❌ NEEDS TESTING
+
+### 4. ChatGPT Actions Integration
+- **OpenAPI Spec**: chatgpt-action-openapi.yaml
+- **Actions**: getKeywordIdeas, createCampaign, createAdGroup
+- **Status**: ✅ PARTIALLY WORKING (keyword ideas working)
+
+## Technical Requirements
+
+### Authentication
+- Google Ads API authentication via service account
+- Developer token management
+- Customer ID validation
+
+### API Integration
+- Google Ads API v19 compatibility
+- Proper payload structure for each endpoint
+- Error handling and logging
+
+### Deployment
+- Render deployment with Docker
+- Environment variable management
+- Automatic deployment from GitHub
+
+## User Stories
+
+### As a Google Ads Manager
+- I want to research keywords for my campaigns using real Google Ads data
+- I want to create campaigns directly from the API
+- I want to add keywords to existing campaigns
+- I want to get bid estimates and competition data
+
+### As a ChatGPT User
+- I want to ask for keyword ideas and get real Google Ads data
+- I want to create campaigns through natural language
+- I want to get campaign performance insights
+
+## Success Metrics
+- Keyword research returns real Google Ads data (✅ ACHIEVED)
+- Campaign creation works without errors
+- ChatGPT Actions respond correctly
+- API response times under 5 seconds
+- 99% uptime on Render deployment
+
+## Technical Debt
+- Fix campaign creation API endpoints
+- Add comprehensive error handling
+- Implement rate limiting
+- Add API documentation
+- Add unit tests
+
+## Future Enhancements
+- Ad copy generation
+- Campaign performance monitoring
+- Bulk keyword upload
+- Advanced targeting options
+- Multi-language support
+- Campaign optimization suggestions
+
+## Dependencies
+- Google Ads API access
+- Service account credentials
+- Developer token approval
+- Render deployment
+- ChatGPT Actions integration 
