@@ -38,7 +38,7 @@ mcp = FastMCP(
 
 # Constants and configuration
 SCOPES = ['https://www.googleapis.com/auth/adwords']
-API_VERSION = "v15"  # Updated to v15 which is more commonly supported
+API_VERSION = "v19"  # Google Ads API version
 
 # Load environment variables
 try:
@@ -1500,8 +1500,10 @@ async def keyword_ideas(
         # Prepare the request payload for the correct endpoint
         payload = {
             "customerId": customer_id,
-            "keywordSeed": {"keywords": q},
-            "language": f"languageConstants/{lang}",
+            "keywordPlanNetwork": "GOOGLE_SEARCH_AND_PARTNERS",
+            "keywordIdeaType": "KEYWORD",
+            "keywordTexts": q,
+            "languageConstants": [f"languageConstants/{lang}"],
             "geoTargetConstants": [f"geoTargetConstants/{geo}"]
         }
         
@@ -1510,7 +1512,7 @@ async def keyword_ideas(
         
         # Make the API call to the correct endpoint
         response = requests.post(
-            f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}:generateKeywordIdeas",
+            f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}/googleAds:searchStream",
             headers=headers,
             json=payload,
             timeout=30
