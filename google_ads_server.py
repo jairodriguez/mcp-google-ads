@@ -1573,16 +1573,32 @@ async def create_campaign(request: CampaignRequest):
         creds = get_credentials()
         headers = get_headers(creds)
         
-        # Create campaign
+        # Step 1: Create campaign budget first
+        budget_payload = {
+            "name": f"{request.campaign_name} Budget",
+            "amountMicros": int(request.budget_amount * 1000000),
+            "deliveryMethod": "STANDARD"
+        }
+        
+        budget_response = requests.post(
+            f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}/campaignBudgets",
+            headers=headers,
+            json=budget_payload,
+            timeout=30
+        )
+        
+        if budget_response.status_code != 200:
+            raise HTTPException(status_code=500, detail=f"Budget creation failed: {budget_response.text}")
+        
+        budget_data = budget_response.json()
+        budget_resource_name = budget_data.get("resourceName")
+        
+        # Step 2: Create campaign with proper v19 structure
         campaign_payload = {
             "name": request.campaign_name,
-            "status": request.status,
-            "campaignBudget": {
-                "name": f"{request.campaign_name} Budget",
-                "amountMicros": int(request.budget_amount * 1000000),
-                "deliveryMethod": "STANDARD"
-            },
-            "advertisingChannelType": request.campaign_type,
+            "status": request.status.upper(),
+            "campaignBudget": budget_resource_name,
+            "advertisingChannelType": "SEARCH",
             "biddingStrategyType": "MAXIMIZE_CONVERSIONS",
             "targetingSetting": {
                 "targetRestrictions": {
@@ -1594,13 +1610,7 @@ async def create_campaign(request: CampaignRequest):
             }
         }
         
-        # Add geo targets
-        if request.geo_targets:
-            campaign_payload["geoTargetConstants"] = [
-                f"geoTargetConstants/{geo}" for geo in request.geo_targets
-            ]
-        
-        # Create campaign using the correct endpoint
+        # Create campaign using the correct v19 endpoint
         response = requests.post(
             f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}/campaigns",
             headers=headers,
@@ -1612,7 +1622,28 @@ async def create_campaign(request: CampaignRequest):
             raise HTTPException(status_code=500, detail=f"Campaign creation failed: {response.text}")
         
         campaign_data = response.json()
-        campaign_id = campaign_data.get("resourceName", "").split("/")[-1]
+        campaign_resource_name = campaign_data.get("resourceName")
+        campaign_id = campaign_resource_name.split("/")[-1] if campaign_resource_name else None
+        
+        # Step 3: Add geo targeting if specified
+        if request.geo_targets and campaign_resource_name:
+            for geo_target in request.geo_targets:
+                geo_payload = {
+                    "campaign": campaign_resource_name,
+                    "location": {
+                        "geoTargetConstant": f"geoTargetConstants/{geo_target}"
+                    }
+                }
+                
+                geo_response = requests.post(
+                    f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}/campaignCriteria",
+                    headers=headers,
+                    json=geo_payload,
+                    timeout=30
+                )
+                
+                if geo_response.status_code != 200:
+                    logger.warning(f"Failed to add geo target {geo_target}: {geo_response.text}")
         
         return CampaignResponse(
             success=True,
@@ -1620,6 +1651,9 @@ async def create_campaign(request: CampaignRequest):
             message=f"Campaign '{request.campaign_name}' created successfully with ID: {campaign_id}"
         )
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
         logger.error(f"Error creating campaign: {str(e)}")
         logger.error(traceback.format_exc())
@@ -1629,14 +1663,20 @@ async def create_campaign(request: CampaignRequest):
 async def create_ad_group(request: AdGroupRequest):
     """Create a new ad group within a campaign"""
     try:
-        customer_id = format_customer_id(request.customer_id)
+        # Extract customer_id from campaign_id if not provided
+        campaign_parts = request.campaign_id.split("/")
+        if len(campaign_parts) >= 2:
+            customer_id = format_customer_id(campaign_parts[1])
+        else:
+            customer_id = format_customer_id(request.campaign_id)
+        
         creds = get_credentials()
         headers = get_headers(creds)
         
-        # Create ad group
+        # Create ad group with proper v19 structure
         ad_group_payload = {
             "name": request.ad_group_name,
-            "status": request.status,
+            "status": request.status.upper(),
             "campaign": f"customers/{customer_id}/campaigns/{request.campaign_id}",
             "type": "SEARCH_STANDARD",
             "cpcBidMicros": int(request.max_cpc * 1000000)
@@ -1653,14 +1693,18 @@ async def create_ad_group(request: AdGroupRequest):
             raise HTTPException(status_code=500, detail=f"Ad group creation failed: {response.text}")
         
         ad_group_data = response.json()
-        ad_group_id = ad_group_data.get("resourceName", "").split("/")[-1]
+        ad_group_resource_name = ad_group_data.get("resourceName")
+        ad_group_id = ad_group_resource_name.split("/")[-1] if ad_group_resource_name else None
         
         # Add keywords to the ad group
+        keywords_added = 0
         for keyword in request.keywords:
             keyword_payload = {
-                "adGroup": f"customers/{customer_id}/adGroups/{ad_group_id}",
-                "text": keyword,
-                "matchType": "PHRASE"
+                "adGroup": ad_group_resource_name,
+                "keyword": {
+                    "text": keyword,
+                    "matchType": "PHRASE"
+                }
             }
             
             keyword_response = requests.post(
@@ -1670,15 +1714,20 @@ async def create_ad_group(request: AdGroupRequest):
                 timeout=30
             )
             
-            if keyword_response.status_code != 200:
+            if keyword_response.status_code == 200:
+                keywords_added += 1
+            else:
                 logger.warning(f"Failed to add keyword '{keyword}': {keyword_response.text}")
         
         return CampaignResponse(
             success=True,
             ad_group_id=ad_group_id,
-            message=f"Ad group '{request.ad_group_name}' created successfully with ID: {ad_group_id}"
+            message=f"Ad group '{request.ad_group_name}' created successfully with ID: {ad_group_id}. Keywords added: {keywords_added}/{len(request.keywords)}"
         )
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
         logger.error(f"Error creating ad group: {str(e)}")
         logger.error(traceback.format_exc())
