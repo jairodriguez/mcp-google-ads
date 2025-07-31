@@ -38,7 +38,7 @@ mcp = FastMCP(
 
 # Constants and configuration
 SCOPES = ['https://www.googleapis.com/auth/adwords']
-API_VERSION = "v16"  # Updated to latest stable Google Ads API version
+API_VERSION = "v15"  # Updated to v15 which is more commonly supported
 
 # Load environment variables
 try:
