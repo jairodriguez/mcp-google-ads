@@ -1497,22 +1497,20 @@ async def keyword_ideas(
         creds = get_credentials()
         headers = get_headers(creds)
         
-        # Prepare the request payload
+        # Prepare the request payload for the correct endpoint
         payload = {
             "customerId": customer_id,
-            "keywordPlanNetwork": "GOOGLE_SEARCH_AND_PARTNERS",
-            "keywordIdeaType": "KEYWORD",
-            "keywordTexts": q,
-            "languageConstants": [f"languageConstants/{lang}"],
+            "keywordSeed": {"keywords": q},
+            "language": f"languageConstants/{lang}",
             "geoTargetConstants": [f"geoTargetConstants/{geo}"]
         }
         
         if limit:
             payload["pageSize"] = limit
         
-        # Make the API call
+        # Make the API call to the correct endpoint
         response = requests.post(
-            f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}/googleAds:searchStream",
+            f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}:generateKeywordIdeas",
             headers=headers,
             json=payload,
             timeout=30
