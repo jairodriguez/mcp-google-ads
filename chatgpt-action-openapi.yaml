@@ -1,0 +1,218 @@
+openapi: 3.1.0
+info:
+  title: Google Ads Keyword Ideas
+  description: |
+    Get keyword ideas and metrics from Google Ads API.
+    
+    Use this action when you need to:
+    - Generate keyword suggestions for Google Ads campaigns
+    - Get search volume and competition data for keywords
+    - Find bid estimates for keyword planning
+    - Research keywords for specific markets or languages
+    - Create complete Google Ads campaigns with keywords
+    
+    The action requires a Google Ads customer ID and seed keywords.
+    Language and geography are automatically detected from user input.
+  version: 1.0.0
+servers:
+  - url: https://mcp-google-ads-vtmp.onrender.com
+paths:
+  /keyword-ideas:
+    get:
+      operationId: getKeywordIdeas
+      summary: Get keyword ideas from Google Ads
+      description: |
+        Retrieves keyword suggestions and performance metrics from Google Ads API.
+        Use this when you need keyword research data for campaign planning.
+        Language and geography are automatically detected from user input.
+      parameters:
+        - name: customer_id
+          in: query
+          required: true
+          description: Google Ads customer ID (without dashes)
+          schema:
+            type: string
+            example: "9197949842"
+        - name: q
+          in: query
+          required: true
+          description: Seed keywords to generate ideas from (comma-separated)
+          schema:
+            type: string
+            example: "glamping,tents"
+        - name: geo
+          in: query
+          required: false
+          description: Geographic target constant ID (2484 for Mexico, 2840 for US, 2826 for Canada)
+          schema:
+            type: string
+            example: "2484"
+        - name: lang
+          in: query
+          required: false
+          description: Language constant ID (1003 for Spanish, 1000 for English, 1002 for French)
+          schema:
+            type: string
+            example: "1003"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of keyword ideas to return
+          schema:
+            type: integer
+            example: 10
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    text:
+                      type: string
+                      description: The keyword text
+                    avg_monthly_searches:
+                      type: integer
+                      description: Average monthly search volume
+                    competition:
+                      type: string
+                      description: Competition level (LOW, MEDIUM, HIGH)
+                    bid_low_micros:
+                      type: integer
+                      description: Low bid estimate in micros
+                    bid_high_micros:
+                      type: integer
+                      description: High bid estimate in micros
+  /create-campaign:
+    post:
+      operationId: createCampaign
+      summary: Create a new Google Ads campaign
+      description: |
+        Creates a complete Google Ads campaign with budget, targeting, and ad group.
+        Use this when you need to create campaigns directly in Google Ads accounts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customer_id
+                - campaign_name
+                - budget_amount
+              properties:
+                customer_id:
+                  type: string
+                  description: Google Ads customer ID (without dashes)
+                  example: "9197949842"
+                campaign_name:
+                  type: string
+                  description: Name for the new campaign
+                  example: "Glamping Luxury Campaign"
+                budget_amount:
+                  type: number
+                  description: Daily budget amount in account currency
+                  example: 50.0
+                budget_type:
+                  type: string
+                  enum: [DAILY, MONTHLY]
+                  default: DAILY
+                  description: Budget type
+                campaign_type:
+                  type: string
+                  enum: [SEARCH, DISPLAY, VIDEO]
+                  default: SEARCH
+                  description: Campaign type
+                geo_targets:
+                  type: array
+                  items:
+                    type: string
+                  description: Geographic target constant IDs
+                  example: ["2484"]
+                language:
+                  type: string
+                  description: Language constant ID
+                  example: "1003"
+                status:
+                  type: string
+                  enum: [PAUSED, ENABLED]
+                  default: PAUSED
+                  description: Campaign status
+      responses:
+        '200':
+          description: Campaign created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the operation was successful
+                  campaign_id:
+                    type: string
+                    description: The created campaign ID
+                  message:
+                    type: string
+                    description: Success message
+  /create-ad-group:
+    post:
+      operationId: createAdGroup
+      summary: Create a new ad group with keywords
+      description: |
+        Creates an ad group within an existing campaign and adds keywords.
+        Use this to add keyword targeting to campaigns.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - campaign_id
+                - ad_group_name
+                - keywords
+              properties:
+                campaign_id:
+                  type: string
+                  description: The campaign ID to add the ad group to
+                  example: "1234567890"
+                ad_group_name:
+                  type: string
+                  description: Name for the new ad group
+                  example: "Glamping Keywords"
+                keywords:
+                  type: array
+                  items:
+                    type: string
+                  description: List of keywords to add to the ad group
+                  example: ["glamping", "luxury camping", "glamping tents"]
+                max_cpc:
+                  type: number
+                  description: Maximum cost per click bid
+                  example: 1.0
+                status:
+                  type: string
+                  enum: [PAUSED, ENABLED]
+                  default: PAUSED
+                  description: Ad group status
+      responses:
+        '200':
+          description: Ad group created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether the operation was successful
+                  ad_group_id:
+                    type: string
+                    description: The created ad group ID
+                  message:
+                    type: string
+                    description: Success message 
