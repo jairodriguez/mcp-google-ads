@@ -38,7 +38,7 @@ mcp = FastMCP(
 
 # Constants and configuration
 SCOPES = ['https://www.googleapis.com/auth/adwords']
-API_VERSION = "v19"  # Google Ads API version
+API_VERSION = "v16"  # Updated to latest stable Google Ads API version
 
 # Load environment variables
 try:
@@ -1600,7 +1600,7 @@ async def create_campaign(request: CampaignRequest):
                 f"geoTargetConstants/{geo}" for geo in request.geo_targets
             ]
         
-        # Create campaign
+        # Create campaign using the correct endpoint
         response = requests.post(
             f"https://googleads.googleapis.com/{API_VERSION}/customers/{customer_id}/campaigns",
             headers=headers,
