@@ -7,6 +7,9 @@ google-auth-oauthlib>=1.1.0
 google-auth-httplib2>=0.1.1
 requests>=2.31.0
 
+# Google Ads API library
+google-ads>=22.0.0
+
 # Environment configuration
 python-dotenv>=1.0.0
 
