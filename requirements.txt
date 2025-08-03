@@ -18,3 +18,12 @@ matplotlib>=3.7.3
 pandas>=2.1.4
 fastapi
 uvicorn[standard]
+
+# Testing dependencies
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.1
+pytest-asyncio>=0.21.1
+pytest-html>=3.2.0
+httpx>=0.24.1
+responses>=0.23.3

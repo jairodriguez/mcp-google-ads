@@ -25,7 +25,6 @@ import requests
 # Import Google Ads library for proper API integration
 from google.ads.googleads.client import GoogleAdsClient
 from google.ads.googleads.errors import GoogleAdsException
-from google.ads.googleads.util import ResourceName
 
 # Import centralized error handling
 from error_handlers import (
@@ -307,7 +306,7 @@ async def keyword_ideas_health_check():
 # ============================================================================
 
 @app.get("/api/status")
-async def get_api_status(request: Request):
+async def get_api_status(request: Request = None):
     """Get comprehensive API status with error handling"""
     try:
         return {
@@ -328,7 +327,7 @@ async def get_api_status(request: Request):
         raise ServiceUnavailableError("Service status check failed")
 
 @app.get("/api/validate-customer/{customer_id}")
-async def validate_customer(customer_id: str, request: Request):
+async def validate_customer(customer_id: str, request: Request = None):
     """Validate customer ID with comprehensive error handling"""
     try:
         # Validate customer ID format
@@ -373,7 +372,7 @@ async def validate_customer(customer_id: str, request: Request):
         raise ServiceUnavailableError("Customer validation service unavailable")
 
 @app.post("/api/validate-campaign")
-async def validate_campaign(campaign_id: str = Query(..., description="Campaign ID to validate"), request: Request):
+async def validate_campaign(campaign_id: str = Query(..., description="Campaign ID to validate"), request: Request = None):
     """Validate campaign ID with comprehensive error handling"""
     try:
         # Validate campaign ID format
@@ -429,7 +428,7 @@ async def validate_campaign(campaign_id: str = Query(..., description="Campaign 
         raise ServiceUnavailableError("Campaign validation service unavailable")
 
 @app.get("/api/error-test")
-async def test_error_handling(error_type: str = Query(..., description="Type of error to test"), request: Request):
+async def test_error_handling(error_type: str = Query(..., description="Type of error to test"), request: Request = None):
     """Test endpoint for error handling system"""
     try:
         if error_type == "validation":
